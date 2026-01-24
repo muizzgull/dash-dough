@@ -202,7 +202,7 @@ window.processCancellation = (orderId) => {
     setTimeout(() => {
         const order = orders.find(o => o.id === orderId);
         const cancelParams = { order_id: order.id, customer_name: order.customer.name, customer_phone: order.customer.phone, total_price: order.total };
-        emailjs.send('service_dash', 'template_sla381a', cancelParams);
+        emailjs.send('service_xzcd8eq', 'template_sla381a', cancelParams);
         
         orders = orders.filter(o => o.id !== orderId);
         saveState(); router(); closeModal(); showNotification("Order Cancelled!");
@@ -220,7 +220,8 @@ function showNotification(msg) {
 function showOrderTimerPopup() {
     let timeLeft = 5;
     const timerEl = document.createElement('div');
-    timerEl.className = "fixed bottom-10 left-1/2 -translate-x-1/2 bg-[#154BD1] text-[#F3F2D4] px-10 py-5 rounded-3xl shadow-2xl z-[100] font-black uppercase cursor-pointer animate-pop text-center min-w-[300px]";
+    // Changed: Position fixed to top-1/2 and left-1/2 with -translate-y-1/2 to center it vertically and horizontally
+    timerEl.className = "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#154BD1] text-[#F3F2D4] px-10 py-5 rounded-3xl shadow-2xl z-[100] font-black uppercase cursor-pointer animate-pop text-center min-w-[300px]";
     
     const updateHTML = () => {
         timerEl.innerHTML = `<div>ORDER PLACED! VIEW STATUS</div> <div class="text-3xl mt-1">${timeLeft}s</div>`;
@@ -260,7 +261,7 @@ function attachListeners() {
                 const itemDetails = cart.map(i => `${i.qty}x ${PIZZAS.find(p=>p.id===i.id).name} (${i.size}) - Rs. ${i.price * i.qty}`).join('\n');
 
                 const templateParams = { order_id: orderId, customer_name: name, customer_phone: phone, customer_email: emailValue, delivery_address: address, item_details: itemDetails, total_price: total };
-                emailjs.send('service_dash', 'template_cl3np7j', templateParams);
+                emailjs.send('service_xzcd8eq', 'template_cl3np7j', templateParams);
 
                 orders.unshift({ id: orderId, items: [...cart], total: total, timestamp: Date.now(), customer: { name, phone, email: emailValue, address } });
                 unreadOrdersCount++;
