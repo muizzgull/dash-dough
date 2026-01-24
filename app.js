@@ -224,7 +224,7 @@ function showOrderTimerPopup() {
     timerEl.className = "fixed inset-0 m-auto flex flex-col items-center justify-center w-fit h-fit bg-[#154BD1] text-[#F3F2D4] px-10 py-5 rounded-3xl shadow-2xl z-[100] font-black uppercase cursor-pointer animate-pop text-center min-w-[300px]";
     
     const updateHTML = () => {
-        timerEl.innerHTML = `<div>ORDER PLACED! VIEW STATUS</div> <div class="text-3xl mt-1">${timeLeft}s</div>`;
+        timerEl.innerHTML = `<div>ORDER PLACED! VIEW YOUR ORDERS</div> <div class="text-3xl mt-1">${timeLeft}s</div>`;
     };
     
     updateHTML();
