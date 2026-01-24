@@ -1,22 +1,23 @@
 const PIZZAS = [
-    { id: 1, name: "American Heat", category: "Classic", prices: { Regular: 800, Party: 1550 }, img: "american-heat.png" },
-    { id: 2, name: "Smokey Wheel", category: "Classic", prices: { Regular: 800, Party: 1550 }, img: "smoky-wheel.png" },
-    { id: 3, name: "Extreme Kababish", category: "Premium", prices: { Regular: 900, Party: 1750 }, img: "extreme-kababish.png" },
-    { id: 4, name: "Mughlai Pizza", category: "Premium", prices: { Regular: 900, Party: 1750 }, img: "mughlai-pizza.png" },
-    { id: 5, name: "Dynamite Ranch", category: "Premium", prices: { Regular: 900, Party: 1750 }, img: "dynamite-ranch.png" },
-    { id: 6, name: "Double Dough American Heat", category: "Double Dough", prices: { standard: 2100 }, img: "american-heat.png" },
-    { id: 7, name: "Double Dough Smokey Wheel", category: "Double Dough", prices: { standard: 2100 }, img: "smoky-wheel.png" },
-    { id: 8, name: "Double Dough Extreme Kababish", category: "Double Dough", prices: { standard: 2100 }, img: "extreme-kababish.png" },
-    { id: 9, name: "Double Dough Mughlai Pizza", category: "Double Dough", prices: { standard: 2100 }, img: "mughlai-pizza.png" },
-    { id: 10, name: "Double Dough Dynamite Ranch", category: "Double Dough", prices: { standard: 2100 }, img: "dynamite-ranch.png" },
-    { id: 11, name: "10 Pcs Buzz Bites", category: "Others", prices: { Standard: 500 }, img: "buzz-bites.png" },
-    { id: 12, name: "Small Chocolate Pizza", category: "Others", prices: { Standard: 500 }, img: "chocolate-pizza.png" },
-    { id: 13, name: "Baked Drummet", category: "Others", prices: { "6 Pieces": 370, "10 Pieces": 1000 }, img: "baked-drummet.png" }
+    { id: 1, name: "American Heat", category: "Classic", prices: { Regular: 800, Party: 1550 }, img: "american-heat.png", desc: "Pizza with Jalapenos, Fiery sauce and Cheese." },
+    { id: 2, name: "Smokey Wheel", category: "Classic", prices: { Regular: 800, Party: 1550 }, img: "smoky-wheel.png", desc: "Pizza with Jalapenos, Fiery sauce and Cheese." },
+    { id: 3, name: "Extreme Kababish", category: "Premium", prices: { Regular: 900, Party: 1750 }, img: "extreme-kababish.png", desc: "Pizza with Seekh Kabab and Cheese on Dough." },
+    { id: 4, name: "Mughlai Pizza", category: "Premium", prices: { Regular: 900, Party: 1750 }, img: "mughlai-pizza.png", desc: "Pizza with Creamy Sauce, with Cheese." },
+    { id: 5, name: "Dynamite Ranch", category: "Premium", prices: { Regular: 900, Party: 1750 }, img: "dynamite-ranch.png", desc: "Pizza with Chicken and Cheese." },
+    { id: 6, name: "Double Dough American Heat", category: "Double Dough", prices: { standard: 2100 }, img: "american-heat.png", desc: "Pizza with Jalapenos, Fiery sauce and Cheese." },
+    { id: 7, name: "Double Dough Smokey Wheel", category: "Double Dough", prices: { standard: 2100 }, img: "smoky-wheel.png", desc: "Pizza with Jalapenos, Fiery sauce and Cheese." },
+    { id: 8, name: "Double Dough Extreme Kababish", category: "Double Dough", prices: { standard: 2100 }, img: "extreme-kababish.png", desc: "Pizza with Seekh Kabab and Cheese on Dough." },
+    { id: 9, name: "Double Dough Mughlai Pizza", category: "Double Dough", prices: { standard: 2100 }, img: "mughlai-pizza.png", desc: "Pizza with Creamy Sauce, with Cheese." },
+    { id: 10, name: "Double Dough Dynamite Ranch", category: "Double Dough", prices: { standard: 2100 }, img: "dynamite-ranch.png", desc: "Pizza with Chicken and Cheese." },
+    { id: 11, name: "10 Pcs Buzz Bites", category: "Others", prices: { Standard: 500 }, img: "buzz-bites.png", desc: "Golden chicken, dip it in the sauce." },
+    { id: 12, name: "Small Chocolate Pizza", category: "Others", prices: { Standard: 500 }, img: "chocolate-pizza.png", desc: "Mini Pizza with Chocolate over it." },
+    { id: 13, name: "Baked Drummet", category: "Others", prices: { "6 Pieces": 370, "10 Pieces": 1000 }, img: "baked-drummet.png", desc: "." }
 ];
 
 let cart = JSON.parse(localStorage.getItem('dash_cart')) || [];
 let orders = JSON.parse(localStorage.getItem('dash_orders')) || [];
 let unreadOrdersCount = parseInt(localStorage.getItem('dash_unread_orders')) || 0;
+let appliedDiscount = 0; 
 
 function saveState() {
     localStorage.setItem('dash_cart', JSON.stringify(cart));
@@ -77,9 +78,20 @@ function HomeView() {
     ["Classic", "Premium", "Double Dough", "Others"].forEach(cat => {
         html += `<section class="mb-20 px-2 md:px-4"><h2 class="text-2xl md:text-3xl font-bold mb-10 border-b-2 border-[#154BD1] inline-block pb-2 uppercase ml-2">${cat}</h2><div class="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-10">`;
         PIZZAS.filter(p => p.category === cat).forEach(pizza => {
-            html += `<div class="pizza-card bg-white rounded-2xl overflow-hidden shadow-2xl border border-transparent hover:border-[#154BD1] transition">
+            html += `<div class="pizza-card bg-white rounded-2xl overflow-hidden shadow-2xl border border-transparent hover:border-[#154BD1] transition flex flex-col">
                 <div class="p-3 md:p-5"><div class="bg-gray-50 rounded-2xl flex items-center justify-center"><img src="${pizza.img}" class="w-full h-32 md:h-56 object-contain"></div></div>
-                <div class="p-4 md:p-8 pt-0 md:pt-0"><h3 class="text-sm md:text-2xl font-black uppercase mb-4 h-10 md:h-16 overflow-hidden">${pizza.name}</h3><button onclick="addToCart(${pizza.id})" class="w-full bg-[#154BD1] text-[#F3F2D4] py-2 md:py-4 rounded-xl font-black uppercase">Add to Cart</button></div>
+                <div class="p-4 md:p-8 pt-0 md:pt-0 flex-grow flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm md:text-2xl font-black uppercase mb-2 h-10 md:h-16 overflow-hidden">${pizza.name}</h3>
+                        <p class="text-[10px] md:text-xs font-bold opacity-80 mb-4 line-clamp-2">${pizza.desc}</p>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 mb-4 bg-gray-100 p-2 rounded-xl">
+                        <button onclick="updateMenuQty(${pizza.id}, -1)" class="w-8 h-8 flex items-center justify-center bg-white rounded-lg font-black text-[#154BD1] shadow-sm">-</button>
+                        <span id="menu-qty-${pizza.id}" class="font-black text-lg">1</span>
+                        <button onclick="updateMenuQty(${pizza.id}, 1)" class="w-8 h-8 flex items-center justify-center bg-white rounded-lg font-black text-[#154BD1] shadow-sm">+</button>
+                    </div>
+                    <button onclick="addToCart(${pizza.id})" class="w-full bg-[#154BD1] text-[#F3F2D4] py-2 md:py-4 rounded-xl font-black uppercase">Add to Cart</button>
+                </div>
             </div>`;
         });
         html += `</div></section>`;
@@ -87,9 +99,19 @@ function HomeView() {
     return html;
 }
 
+window.updateMenuQty = (id, delta) => {
+    const el = document.getElementById(`menu-qty-${id}`);
+    let current = parseInt(el.innerText);
+    current = Math.max(1, current + delta);
+    el.innerText = current;
+};
+
 function CartView() {
     if (cart.length === 0) return `<div class="text-center py-20 uppercase font-black opacity-20"><h2>Cart Empty</h2></div>`;
-    let total = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+    let subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+    let discountAmount = subtotal * appliedDiscount;
+    let finalTotal = subtotal - discountAmount;
+
     return `<div class="max-w-4xl mx-auto px-2">
         <h2 class="text-3xl font-black uppercase mb-10">Your Cart</h2>
         <div id="cart-items-container">
@@ -104,8 +126,23 @@ function CartView() {
             </div>`;
         }).join("")}
         </div>
-        <div class="bg-[#154BD1] text-[#F3F2D4] p-8 rounded-[2rem] mt-10">
-            <h3 class="text-2xl font-black mb-2 uppercase border-b border-white/20 pb-4">Total: Rs. ${total}</h3>
+
+        <div class="bg-white p-6 rounded-3xl mt-6 shadow-sm flex flex-col md:flex-row gap-4 items-center">
+            <input type="text" id="promo-input" placeholder="Enter Promo Code" class="w-full p-4 rounded-xl border-2 border-[#154BD1]/10 font-bold uppercase text-[#154BD1]">
+            <button onclick="applyPromo()" class="w-full md:w-40 bg-[#154BD1] text-white py-4 rounded-xl font-black uppercase">Apply</button>
+        </div>
+
+        <div class="bg-[#154BD1] text-[#F3F2D4] p-8 rounded-[2rem] mt-6">
+            <div class="flex justify-between items-center border-b border-white/20 pb-2 mb-2">
+                <span class="font-bold uppercase opacity-70">Subtotal</span>
+                <span class="font-black">Rs. ${subtotal}</span>
+            </div>
+            ${appliedDiscount > 0 ? `
+            <div class="flex justify-between items-center border-b border-white/20 pb-2 mb-2 text-green-300">
+                <span class="font-bold uppercase">Discount (10%)</span>
+                <span class="font-black">- Rs. ${discountAmount.toFixed(0)}</span>
+            </div>` : ''}
+            <h3 class="text-2xl font-black mb-2 uppercase pb-4">Total: Rs. ${finalTotal.toFixed(0)}</h3>
             <p class="text-[10px] font-black uppercase mb-6 opacity-60 tracking-widest italic">Online payment coming soon</p>
             <form id="order-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input type="text" id="cust-name" placeholder="Full Name" required class="p-4 rounded-xl text-[#154BD1] font-bold">
@@ -117,6 +154,17 @@ function CartView() {
         </div>
     </div>`;
 }
+
+window.applyPromo = () => {
+    const code = document.getElementById('promo-input').value.trim().toLowerCase();
+    if (code === "welcome10%") {
+        appliedDiscount = 0.10;
+        showNotification("10% DISCOUNT APPLIED!");
+        router();
+    } else {
+        showNotification("INVALID PROMO CODE");
+    }
+};
 
 function OrdersView() {
     if (orders.length === 0) return `<div class="text-center py-20 uppercase font-black opacity-20"><h2>No History</h2></div>`;
@@ -148,17 +196,27 @@ window.addToCart = (id) => {
 };
 
 function openSizeModal(pizza) {
+    const menuQty = parseInt(document.getElementById(`menu-qty-${pizza.id}`).innerText);
     const modal = document.createElement('div'); modal.id = 'modal-overlay';
     let buttons = Object.entries(pizza.prices).map(([size, price]) =>
-        `<button onclick="confirmAddToCart(${pizza.id}, '${size}', ${price})" class="w-full p-4 rounded-2xl border-2 border-[#154BD1] text-[#154BD1] font-black mb-2 hover:bg-[#154BD1] hover:text-[#F3F2D4] transition uppercase">${size} - Rs. ${price}</button>`
+        `<button onclick="confirmAddToCart(${pizza.id}, '${size}', ${price}, ${menuQty})" class="w-full p-4 rounded-2xl border-2 border-[#154BD1] text-[#154BD1] font-black mb-2 hover:bg-[#154BD1] hover:text-[#F3F2D4] transition uppercase">${size} - Rs. ${price}</button>`
     ).join('');
-    modal.innerHTML = `<div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl animate-pop"><h2 class="text-2xl font-black mb-6 uppercase text-[#154BD1]">${pizza.name}</h2>${buttons}<button onclick="closeModal()" class="mt-4 w-full text-[10px] font-black opacity-30 uppercase">Close</button></div>`;
+    modal.innerHTML = `<div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl animate-pop text-center">
+        <h2 class="text-2xl font-black mb-1 uppercase text-[#154BD1]">${pizza.name}</h2>
+        <p class="text-xs font-bold opacity-60 mb-4 px-2">${pizza.desc}</p>
+        <p class="mb-6 font-bold opacity-50 uppercase text-xs">Quantity: ${menuQty}</p>
+        ${buttons}
+        <button onclick="closeModal()" class="mt-4 w-full text-[10px] font-black opacity-30 uppercase">Close</button>
+    </div>`;
     document.body.appendChild(modal);
 }
 
-window.confirmAddToCart = (id, size, price) => {
+window.confirmAddToCart = (id, size, price, qty = 1) => {
+    if (typeof qty !== 'number') qty = parseInt(document.getElementById(`menu-qty-${id}`).innerText);
     const item = cart.find(i => i.id === id && i.size === size);
-    if (item) item.qty++; else cart.push({ id, size, price, qty: 1 });
+    if (item) item.qty += qty; else cart.push({ id, size, price, qty });
+    const menuQtyEl = document.getElementById(`menu-qty-${id}`);
+    if (menuQtyEl) menuQtyEl.innerText = 1;
     saveState(); closeModal(); showNotification("Added to Cart!");
 };
 
@@ -220,11 +278,10 @@ function showNotification(msg) {
 function showOrderTimerPopup() {
     let timeLeft = 5;
     const timerEl = document.createElement('div');
-    // Centering Fix: Use inset-0, flex, and margin-auto for perfect dead-center alignment on all screens
     timerEl.className = "fixed inset-0 m-auto flex flex-col items-center justify-center w-fit h-fit bg-[#154BD1] text-[#F3F2D4] px-10 py-5 rounded-3xl shadow-2xl z-[100] font-black uppercase cursor-pointer animate-pop text-center min-w-[300px]";
     
     const updateHTML = () => {
-        timerEl.innerHTML = `<div>ORDER PLACED! VIEW YOUR ORDERS</div> <div class="text-3xl mt-1">${timeLeft}s</div>`;
+        timerEl.innerHTML = `<div>ORDER PLACED! VIEW STATUS</div> <div class="text-3xl mt-1">${timeLeft}s</div>`;
     };
     
     updateHTML();
@@ -257,15 +314,31 @@ function attachListeners() {
                 const name = document.getElementById('cust-name').value;
                 const phone = document.getElementById('cust-phone').value;
                 const address = document.getElementById('cust-address').value;
-                const total = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+                
+                const subtotal = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+                const total = Math.round(subtotal - (subtotal * appliedDiscount));
+
                 const itemDetails = cart.map(i => `${i.qty}x ${PIZZAS.find(p=>p.id===i.id).name} (${i.size}) - Rs. ${i.price * i.qty}`).join('\n');
 
-                const templateParams = { order_id: orderId, customer_name: name, customer_phone: phone, customer_email: emailValue, delivery_address: address, item_details: itemDetails, total_price: total };
+                const templateParams = { 
+                    order_id: orderId, 
+                    customer_name: name, 
+                    customer_phone: phone, 
+                    customer_email: emailValue, 
+                    delivery_address: address, 
+                    item_details: itemDetails + (appliedDiscount > 0 ? `\n(Applied welcome10% Promo)` : ''), 
+                    total_price: total 
+                };
+                
                 emailjs.send('service_xzcd8eq', 'template_cl3np7j', templateParams);
 
                 orders.unshift({ id: orderId, items: [...cart], total: total, timestamp: Date.now(), customer: { name, phone, email: emailValue, address } });
                 unreadOrdersCount++;
-                cart = []; saveState(); router(); showOrderTimerPopup();
+                cart = []; 
+                appliedDiscount = 0; 
+                saveState(); 
+                router(); 
+                showOrderTimerPopup();
             }, 2000);
         };
     }
