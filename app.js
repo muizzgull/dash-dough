@@ -11,7 +11,7 @@ const PIZZAS = [
     { id: 10, name: "Double Dough Dynamite Ranch", category: "Double Dough", prices: { standard: 2100 }, img: "dynamite-ranch.png", desc: "Pizza with Chicken and Cheese." },
     { id: 11, name: "10 Pcs Buzz Bites", category: "Others", prices: { Standard: 500 }, img: "buzz-bites.png", desc: "Golden chicken, dip it in the sauce." },
     { id: 12, name: "Small Chocolate Pizza", category: "Others", prices: { Standard: 500 }, img: "chocolate-pizza.png", desc: "Mini Pizza with Chocolate over it." },
-    { id: 13, name: "Baked Drummet", category: "Others", prices: { "6 Pieces": 370, "10 Pieces": 1000 }, img: "baked-drummet.png", desc: "." }
+    { id: 13, name: "Baked Drummet", category: "Others", prices: { "6 Pieces": 370, "10 Pieces": 1000 }, img: "baked-drummet.png", desc: "Oven-baked chicken drummets seasoned to perfection." }
 ];
 
 let cart = JSON.parse(localStorage.getItem('dash_cart')) || [];
@@ -74,12 +74,30 @@ function renderFooter() {
 }
 
 function HomeView() {
-    let html = `<header class="mb-16 text-center px-4"><h1 class="text-4xl md:text-7xl font-black tracking-tighter uppercase">WELCOME</h1></header>`;
+    // 1. Removed 'px-4' from header so it's edge-to-edge width.
+    // 2. 'w-full' makes the width as large as possible.
+    // 3. 'h-auto' ensures the full image shows without stretching or cropping.
+    // 4. Removed all div wrappers to eliminate any background colors.
+    let html = `<header class="mb-10 mt-10 w-full">
+                    <img src="hero-img3.jpeg" 
+                         alt="Dash Dough Banner" 
+                         class="w-full h-[60vh] md:h-[80vh] object-cover rounded-[2rem] block border-0">
+                </header>`;
+                
     ["Classic", "Premium", "Double Dough", "Others"].forEach(cat => {
-        html += `<section class="mb-20 px-2 md:px-4"><h2 class="text-2xl md:text-3xl font-bold mb-10 border-b-2 border-[#154BD1] inline-block pb-2 uppercase ml-2">${cat}</h2><div class="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-10">`;
+        html += `<section class="mb-20 px-2 md:px-4">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-10 border-b-2 border-[#154BD1] inline-block pb-2 uppercase ml-2">
+                        ${cat}
+                    </h2>
+                    <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-10">`;
+        
         PIZZAS.filter(p => p.category === cat).forEach(pizza => {
             html += `<div class="pizza-card bg-white rounded-2xl overflow-hidden shadow-2xl border border-transparent hover:border-[#154BD1] transition flex flex-col">
-                <div class="p-3 md:p-5"><div class="bg-gray-50 rounded-2xl flex items-center justify-center"><img src="${pizza.img}" class="w-full h-32 md:h-56 object-contain"></div></div>
+                <div class="p-3 md:p-5">
+                    <div class="bg-gray-50 rounded-2xl flex items-center justify-center">
+                        <img src="${pizza.img}" class="w-full h-32 md:h-56 object-contain">
+                    </div>
+                </div>
                 <div class="p-4 md:p-8 pt-0 md:pt-0 flex-grow flex flex-col justify-between">
                     <div>
                         <h3 class="text-sm md:text-2xl font-black uppercase mb-2 h-10 md:h-16 overflow-hidden">${pizza.name}</h3>
