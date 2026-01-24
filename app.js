@@ -220,8 +220,8 @@ function showNotification(msg) {
 function showOrderTimerPopup() {
     let timeLeft = 5;
     const timerEl = document.createElement('div');
-    // Changed: Position fixed to top-1/2 and left-1/2 with -translate-y-1/2 to center it vertically and horizontally
-    timerEl.className = "fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#154BD1] text-[#F3F2D4] px-10 py-5 rounded-3xl shadow-2xl z-[100] font-black uppercase cursor-pointer animate-pop text-center min-w-[300px]";
+    // Centering Fix: Use inset-0, flex, and margin-auto for perfect dead-center alignment on all screens
+    timerEl.className = "fixed inset-0 m-auto flex flex-col items-center justify-center w-fit h-fit bg-[#154BD1] text-[#F3F2D4] px-10 py-5 rounded-3xl shadow-2xl z-[100] font-black uppercase cursor-pointer animate-pop text-center min-w-[300px]";
     
     const updateHTML = () => {
         timerEl.innerHTML = `<div>ORDER PLACED! VIEW STATUS</div> <div class="text-3xl mt-1">${timeLeft}s</div>`;
