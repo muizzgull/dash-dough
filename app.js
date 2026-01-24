@@ -74,23 +74,20 @@ function renderFooter() {
 }
 
 function HomeView() {
-    // 1. Removed 'px-4' from header so it's edge-to-edge width.
-    // 2. 'w-full' makes the width as large as possible.
-    // 3. 'h-auto' ensures the full image shows without stretching or cropping.
-    // 4. Removed all div wrappers to eliminate any background colors.
-    let html = `<header class="mb-10 mt-10 w-full">
-                    <img src="hero-img3.jpeg" 
-                         alt="Dash Dough Banner" 
-                         class="w-full h-[60vh] md:h-[80vh] object-cover rounded-[2rem] block border-0">
+    // We use object-contain so the image never crops or stretches
+    // The bg-[#D89000] fills the rest of the wide banner space
+    let html = `<header class="mb-10 px-0">
+                    <div class="w-full mt-10 h-[180px] rounded-2xl md:h-[300px] flex items-center justify-center" style="background-color: #D89000;">
+                        <img src="hero-img.jpeg" 
+                             alt="Dash Dough Banner" 
+                             class="max-w-full max-h-full object-contain block">
+                    </div>
                 </header>`;
                 
     ["Classic", "Premium", "Double Dough", "Others"].forEach(cat => {
         html += `<section class="mb-20 px-2 md:px-4">
-                    <h2 class="text-2xl md:text-3xl font-bold mb-10 border-b-2 border-[#154BD1] inline-block pb-2 uppercase ml-2">
-                        ${cat}
-                    </h2>
+                    <h2 class="text-2xl md:text-3xl font-bold mb-10 border-b-2 border-[#154BD1] inline-block pb-2 uppercase ml-2">${cat}</h2>
                     <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-10">`;
-        
         PIZZAS.filter(p => p.category === cat).forEach(pizza => {
             html += `<div class="pizza-card bg-white rounded-2xl overflow-hidden shadow-2xl border border-transparent hover:border-[#154BD1] transition flex flex-col">
                 <div class="p-3 md:p-5">
