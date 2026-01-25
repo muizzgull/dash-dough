@@ -27,22 +27,59 @@ function saveState() {
     if (cartBadge) cartBadge.innerText = cart.reduce((acc, item) => acc + item.qty, 0);
     const orderBadge = document.getElementById('order-count');
     if (orderBadge) {
-        if (window.location.hash === "#/orders") {
-            unreadOrdersCount = 0;
-            localStorage.setItem('dash_unread_orders', 0);
-        }
+        if (window.location.hash === "#/orders") { unreadOrdersCount = 0; localStorage.setItem('dash_unread_orders', 0); }
         orderBadge.innerText = unreadOrdersCount;
         orderBadge.classList.toggle('hidden', unreadOrdersCount === 0);
     }
+    renderFloatingCart();
+}
+
+function isStoreOpen() {
+    const now = new Date();
+    const pkTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Karachi"}));
+    const hours = pkTime.getHours();
+    const minutes = pkTime.getMinutes();
+    const currentTimeInMinutes = hours * 60 + minutes;
+    const openingTime = 17 * 60; // 5 PM
+    const closingTime = (2 * 60) + 45; // 2:45 AM
+    return (currentTimeInMinutes >= openingTime || currentTimeInMinutes <= closingTime);
+}
+
+function renderFloatingCart() {
+    const barContainer = document.getElementById('floating-cart-bar');
+    if (!barContainer) return;
+    
+    if (cart.length === 0 || window.location.hash === "#/cart") {
+        barContainer.innerHTML = "";
+        return;
+    }
+
+    const totalQty = cart.reduce((acc, item) => acc + item.qty, 0);
+    const totalPrice = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+
+    // This creates a beautiful square "Action Card" centered at the bottom
+    barContainer.innerHTML = `
+        <div class="group pointer-events-auto cursor-pointer flex flex-col items-center" onclick="location.hash='#/cart'">
+            <div class="w-24 h-24 md:w-28 md:h-28 bg-[#154BD1] text-[#F3F2D4] rounded-[2rem] shadow-[0_20px_50px_rgba(21,75,209,0.3)] flex flex-col items-center justify-center border-4 border-white transform transition-all duration-300 hover:scale-110 active:scale-95">
+                <div class="relative mb-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-8 md:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                    <span class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-black border-2 border-[#154BD1]">${totalQty}</span>
+                </div>
+                <span class="font-black text-[10px] uppercase tracking-tighter mb-1">View Cart</span>
+                <span class="font-black text-xs md:text-sm">Rs. ${totalPrice}</span>
+            </div>
+        </div>
+    `;
 }
 
 const router = () => {
     const routes = [{ path: "#/", view: HomeView }, { path: "#/cart", view: CartView }, { path: "#/orders", view: OrdersView }];
     const currentHash = location.hash || "#/";
     const match = routes.find(r => r.path === currentHash) || routes[0];
-    if (currentHash === "#/orders") unreadOrdersCount = 0;
     window.scrollTo(0, 0);
-    document.getElementById("app").innerHTML = `<main class="min-h-screen pb-20">${match.view()}</main>${renderFooter()}`;
+    document.getElementById("app").innerHTML = `<main class="min-h-screen pb-32">${match.view()}</main>${renderFooter()}`;
     saveState();
     attachListeners();
 };
@@ -53,13 +90,11 @@ window.addEventListener("load", router);
 function renderFooter() {
     return `<footer class="mt-20 border-t-4 border-[#154BD1] bg-white rounded-t-[3rem] pt-16 pb-8 px-6">
         <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 text-[#154BD1]">
-            <div>
-                <a href="#/" onclick="window.scrollTo(0,0)" class="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-4 block">Dash Dough</a>
-            </div>
+            <div><a href="#/" class="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-4 block">Dash Dough</a></div>
             <div>
                 <h4 class="text-xs font-black uppercase mb-6 opacity-40">Links</h4>
                 <ul class="flex flex-col gap-3 font-bold uppercase">
-                    <li><a href="#/" onclick="window.scrollTo(0,0)">Explore Menu</a></li>
+                    <li><a href="#/">Explore Menu</a></li>
                     <li><a href="#/cart">Your Cart</a></li>
                     <li><a href="#/orders">Your Orders</a></li>
                 </ul>
@@ -74,30 +109,28 @@ function renderFooter() {
 }
 
 function HomeView() {
-    // We use object-contain so the image never crops or stretches
-    // The bg-[#D89000] fills the rest of the wide banner space
-    let html = `<header class="mb-10 px-0">
-                    <div class="w-full mt-10 h-[180px] rounded-2xl md:h-[300px] flex items-center justify-center" style="background-color: #D89000;">
-                        <img src="hero-img.jpeg" 
-                             alt="Dash Dough Banner" 
-                             class="max-w-full max-h-full object-contain block">
-                    </div>
-                </header>`;
+    let html = `<header class="mb-10 px-0"><div class="w-full mt-10 h-[180px] rounded-2xl md:h-[300px] flex items-center justify-center" style="background-color: #D89000;"><img src="hero-img.jpeg" alt="Banner" class="max-w-full max-h-full object-contain block"></div></header>`;
                 
     ["Classic", "Premium", "Double Dough", "Others"].forEach(cat => {
         html += `<section class="mb-20 px-2 md:px-4">
                     <h2 class="text-2xl md:text-3xl font-bold mb-10 border-b-2 border-[#154BD1] inline-block pb-2 uppercase ml-2">${cat}</h2>
                     <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-10">`;
+        
         PIZZAS.filter(p => p.category === cat).forEach(pizza => {
-            html += `<div class="pizza-card bg-white rounded-2xl overflow-hidden shadow-2xl border border-transparent hover:border-[#154BD1] transition flex flex-col">
-                <div class="p-3 md:p-5">
-                    <div class="bg-gray-50 rounded-2xl flex items-center justify-center">
-                        <img src="${pizza.img}" class="w-full h-32 md:h-56 object-contain">
-                    </div>
-                </div>
+            const minPrice = Math.min(...Object.values(pizza.prices));
+            
+            // LOGIC: Show "FROM" if it's Classic, Premium, OR the Baked Drummet
+            const showFrom = (cat === "Classic" || cat === "Premium" || pizza.name === "Baked Drummet");
+            const priceLabel = showFrom ? `FROM RS. ${minPrice}` : `RS. ${minPrice}`;
+
+            html += `<div class="pizza-card bg-yellow-400 rounded-2xl overflow-hidden shadow-2xl border-2 border-white hover:border-[#154BD1] transition flex flex-col">
+                <div class="p-3 md:p-5"><div class="bg-gray-50 rounded-2xl flex items-center justify-center"><img src="${pizza.img}" class="w-full bg-yellow-400 rounded-2xl h-32 md:h-56 object-contain"></div></div>
                 <div class="p-4 md:p-8 pt-0 md:pt-0 flex-grow flex flex-col justify-between">
                     <div>
-                        <h3 class="text-sm md:text-2xl font-black uppercase mb-2 h-10 md:h-16 overflow-hidden">${pizza.name}</h3>
+                        <div class="flex flex-col mb-2">
+                             <h3 class="text-sm md:text-2xl font-black uppercase line-clamp-2">${pizza.name}</h3>
+                             <p class="text-[10px] md:text-[12px] font-black bg-white px-3 py-3 rounded-md shadow-sm w-fit mt-1 uppercase">${priceLabel}</p>
+                        </div>
                         <p class="text-[10px] md:text-xs font-bold opacity-80 mb-4 line-clamp-2">${pizza.desc}</p>
                     </div>
                     <div class="flex items-center justify-between gap-2 mb-4 bg-gray-100 p-2 rounded-xl">
@@ -124,15 +157,14 @@ window.updateMenuQty = (id, delta) => {
 function CartView() {
     if (cart.length === 0) return `<div class="text-center py-20 uppercase font-black opacity-20"><h2>Cart Empty</h2></div>`;
     let subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
-    let discountAmount = subtotal * appliedDiscount;
-    let finalTotal = subtotal - discountAmount;
+    let finalTotal = subtotal - (subtotal * appliedDiscount);
 
     return `<div class="max-w-4xl mx-auto px-2">
         <h2 class="text-3xl font-black uppercase mb-10">Your Cart</h2>
         <div id="cart-items-container">
         ${cart.map(item => {
             const pizza = PIZZAS.find(p => p.id === item.id);
-            return `<div id="item-${item.id}-${item.size.replace(/\s/g, '')}" class="flex items-center justify-between bg-white p-4 rounded-2xl mb-4 shadow-sm transition-all duration-300">
+            return `<div id="item-${item.id}-${item.size.replace(/\s/g, '')}" class="flex items-center justify-between bg-white p-4 rounded-2xl mb-4 shadow-sm">
                 <div class="flex items-center gap-4"><img src="${pizza.img}" class="w-16 h-16 rounded-lg object-contain bg-gray-50"><div><h4 class="text-xs md:text-xl font-black uppercase">${pizza.name} [${item.size}]</h4><p class="font-bold opacity-60">Rs. ${item.price}</p></div></div>
                 <div class="flex items-center gap-4">
                     <button onclick="changeQty(${item.id}, '${item.size}', -1)" class="font-black px-2">-</button><span class="font-black">${item.qty}</span><button onclick="changeQty(${item.id}, '${item.size}', 1)" class="font-black px-2">+</button>
@@ -141,30 +173,18 @@ function CartView() {
             </div>`;
         }).join("")}
         </div>
-
         <div class="bg-white p-6 rounded-3xl mt-6 shadow-sm flex flex-col md:flex-row gap-4 items-center">
-            <input type="text" id="promo-input" placeholder="Enter Promo Code" class="w-full p-4 rounded-xl border-2 border-[#154BD1]/10 font-bold uppercase text-[#154BD1]">
+            <input type="text" id="promo-input" placeholder="Promo Code" class="w-full p-4 rounded-xl border-2 border-[#154BD1]/10 font-bold uppercase">
             <button onclick="applyPromo()" class="w-full md:w-40 bg-[#154BD1] text-white py-4 rounded-xl font-black uppercase">Apply</button>
         </div>
-
         <div class="bg-[#154BD1] text-[#F3F2D4] p-8 rounded-[2rem] mt-6">
-            <div class="flex justify-between items-center border-b border-white/20 pb-2 mb-2">
-                <span class="font-bold uppercase opacity-70">Subtotal</span>
-                <span class="font-black">Rs. ${subtotal}</span>
-            </div>
-            ${appliedDiscount > 0 ? `
-            <div class="flex justify-between items-center border-b border-white/20 pb-2 mb-2 text-green-300">
-                <span class="font-bold uppercase">Discount (10%)</span>
-                <span class="font-black">- Rs. ${discountAmount.toFixed(0)}</span>
-            </div>` : ''}
-            <h3 class="text-2xl font-black mb-2 uppercase pb-4">Total: Rs. ${finalTotal.toFixed(0)}</h3>
-            <p class="text-[10px] font-black uppercase mb-6 opacity-60 tracking-widest italic">Online payment coming soon</p>
+            <h3 class="text-2xl font-black mb-6 uppercase">Total: Rs. ${finalTotal.toFixed(0)}</h3>
             <form id="order-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input type="text" id="cust-name" placeholder="Full Name" required class="p-4 rounded-xl text-[#154BD1] font-bold">
                 <input type="text" id="cust-phone" placeholder="Phone" required class="p-4 rounded-xl text-[#154BD1] font-bold">
-                <input type="email" id="cust-email" placeholder="Gmail (example@gmail.com)" required class="p-4 rounded-xl text-[#154BD1] font-bold md:col-span-2">
-                <input type="text" id="cust-address" placeholder="Delivery Address" required class="p-4 rounded-xl text-[#154BD1] font-bold md:col-span-2">
-                <button type="submit" id="order-btn" class="md:col-span-2 bg-[#F3F2D4] text-[#154BD1] py-5 rounded-xl font-black uppercase text-xl mt-4 transition-all">Order Now</button>
+                <input type="email" id="cust-email" placeholder="Gmail" required class="p-4 rounded-xl text-[#154BD1] font-bold md:col-span-2">
+                <input type="text" id="cust-address" placeholder="Address" required class="p-4 rounded-xl text-[#154BD1] font-bold md:col-span-2">
+                <button type="submit" id="order-btn" class="md:col-span-2 bg-[#F3F2D4] text-[#154BD1] py-5 rounded-xl font-black uppercase text-xl mt-4">Order Now</button>
             </form>
         </div>
     </div>`;
@@ -172,13 +192,8 @@ function CartView() {
 
 window.applyPromo = () => {
     const code = document.getElementById('promo-input').value.trim().toLowerCase();
-    if (code === "welcome10%") {
-        appliedDiscount = 0.10;
-        showNotification("10% DISCOUNT APPLIED!");
-        router();
-    } else {
-        showNotification("INVALID PROMO CODE");
-    }
+    if (code === "welcome10%") { appliedDiscount = 0.10; showNotification("10% DISCOUNT APPLIED!"); router(); } 
+    else { showNotification("INVALID PROMO CODE"); }
 };
 
 function OrdersView() {
@@ -191,15 +206,13 @@ function renderOrdersList() {
     return orders.map(order => {
         const timeLeft = Math.max(0, 300000 - (now - order.timestamp));
         const min = Math.floor(timeLeft / 60000), sec = Math.floor((timeLeft % 60000) / 1000);
-        const itemDetails = order.items.map(i => `${i.qty}x ${PIZZAS.find(p=>p.id===i.id).name} (${i.size})`).join('<br>');
         return `<div class="bg-white p-6 rounded-3xl mb-6 shadow-md border-l-8 border-[#154BD1]">
             <div class="flex justify-between items-start mb-4">
                 <div><p class="text-[10px] opacity-40 font-black uppercase">ID: ${order.id}</p><p class="text-xl font-black">Rs. ${order.total}</p></div>
                 <div class="text-right">
-                    ${timeLeft > 0 ? `<p class="text-xs text-red-500 font-black uppercase mb-2 animate-pulse">${min}:${sec < 10 ? '0' : ''}${sec}</p><button onclick="askCancelOrder('${order.id}')" class="bg-red-500 text-white px-4 py-1 rounded-lg text-[10px] font-black uppercase">Cancel</button>` : `<span class="bg-green-100 text-green-600 px-4 py-2 rounded-xl font-black uppercase text-xs">Confirmed</span>`}
+                    ${timeLeft > 0 ? `<p class="text-xs text-red-500 font-black uppercase animate-pulse">${min}:${sec < 10 ? '0' : ''}${sec}</p><button onclick="askCancelOrder('${order.id}')" class="bg-red-500 text-white px-4 py-1 rounded-lg text-[10px] font-black uppercase mt-1">Cancel</button>` : `<span class="bg-green-100 text-green-600 px-4 py-2 rounded-xl font-black uppercase text-xs">Confirmed</span>`}
                 </div>
             </div>
-            <div class="text-xs font-bold opacity-70 bg-gray-50 p-3 rounded-xl border border-gray-100">${itemDetails}</div>
         </div>`;
     }).join("");
 }
@@ -218,8 +231,7 @@ function openSizeModal(pizza) {
     ).join('');
     modal.innerHTML = `<div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl animate-pop text-center">
         <h2 class="text-2xl font-black mb-1 uppercase text-[#154BD1]">${pizza.name}</h2>
-        <p class="text-xs font-bold opacity-60 mb-4 px-2">${pizza.desc}</p>
-        <p class="mb-6 font-bold opacity-50 uppercase text-xs">Quantity: ${menuQty}</p>
+        <p class="text-xs font-bold opacity-60 mb-6">Quantity: ${menuQty}</p>
         ${buttons}
         <button onclick="closeModal()" class="mt-4 w-full text-[10px] font-black opacity-30 uppercase">Close</button>
     </div>`;
@@ -244,39 +256,26 @@ window.changeQty = (id, size, delta) => {
 };
 
 window.removeItem = (id, size) => {
-    const pizza = PIZZAS.find(p => p.id === id);
-    const elementId = `item-${id}-${size.replace(/\s/g, '')}`;
-    const element = document.getElementById(elementId);
-    if (element) {
-        element.style.transform = "translateX(100px)"; element.style.opacity = "0";
-        setTimeout(() => {
-            cart = cart.filter(i => !(i.id === id && i.size === size));
-            saveState(); router(); showNotification(`REMOVED: ${pizza.name}`);
-        }, 300);
-    } else { cart = cart.filter(i => !(i.id === id && i.size === size)); saveState(); router(); }
+    cart = cart.filter(i => !(i.id === id && i.size === size));
+    saveState(); router();
 };
 
 window.askCancelOrder = (orderId) => {
     const modal = document.createElement('div'); modal.id = 'modal-overlay';
     modal.innerHTML = `<div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl animate-pop text-center">
         <h2 class="text-2xl font-black mb-4 uppercase text-red-500">Cancel Order?</h2>
-        <p class="font-bold opacity-60 mb-6">Are you sure you want to cancel this order? This cannot be undone.</p>
         <button onclick="processCancellation('${orderId}')" id="confirm-cancel-btn" class="w-full bg-red-500 text-white py-4 rounded-xl font-black uppercase mb-3">Yes, Cancel</button>
-        <button onclick="closeModal()" class="w-full text-xs font-black opacity-30 uppercase">No, Go Back</button>
+        <button onclick="closeModal()" class="w-full text-xs font-black opacity-30 uppercase">No</button>
     </div>`;
     document.body.appendChild(modal);
 };
 
 window.processCancellation = (orderId) => {
     const btn = document.getElementById('confirm-cancel-btn');
-    btn.innerText = "CANCELLING...";
-    btn.disabled = true;
-    
+    btn.innerText = "CANCELLING..."; btn.disabled = true;
     setTimeout(() => {
         const order = orders.find(o => o.id === orderId);
-        const cancelParams = { order_id: order.id, customer_name: order.customer.name, customer_phone: order.customer.phone, total_price: order.total };
-        emailjs.send('service_xzcd8eq', 'template_sla381a', cancelParams);
-        
+        emailjs.send('service_xzcd8eq', 'template_sla381a', { order_id: order.id, customer_name: order.customer.name, total_price: order.total });
         orders = orders.filter(o => o.id !== orderId);
         saveState(); router(); closeModal(); showNotification("Order Cancelled!");
     }, 1500);
@@ -293,19 +292,13 @@ function showNotification(msg) {
 function showOrderTimerPopup() {
     let timeLeft = 5;
     const timerEl = document.createElement('div');
-    timerEl.className = "fixed inset-0 m-auto flex flex-col items-center justify-center w-fit h-fit bg-[#154BD1] text-[#F3F2D4] px-10 py-5 rounded-3xl shadow-2xl z-[100] font-black uppercase cursor-pointer animate-pop text-center min-w-[300px]";
-    
-    const updateHTML = () => {
-        timerEl.innerHTML = `<div>ORDER PLACED! VIEW STATUS</div> <div class="text-3xl mt-1">${timeLeft}s</div>`;
-    };
-    
+    timerEl.className = "fixed inset-0 m-auto flex flex-col items-center justify-center w-fit h-fit bg-[#154BD1] text-[#F3F2D4] px-10 py-5 rounded-3xl shadow-2xl z-[100] font-black uppercase animate-pop text-center min-w-[300px]";
+    const updateHTML = () => { timerEl.innerHTML = `<div>ORDER PLACED!</div> <div class="text-3xl mt-1">${timeLeft}s</div>`; };
     updateHTML();
-    timerEl.onclick = () => { clearInterval(itv); timerEl.remove(); location.hash = "#/orders"; };
     document.body.appendChild(timerEl);
-    
     const itv = setInterval(() => {
         timeLeft--;
-        if (timeLeft <= 0) { clearInterval(itv); timerEl.remove(); }
+        if (timeLeft <= 0) { clearInterval(itv); timerEl.remove(); location.hash = "#/orders"; }
         else updateHTML();
     }, 1000);
 }
@@ -315,45 +308,19 @@ function attachListeners() {
     if (form) {
         form.onsubmit = (e) => {
             e.preventDefault();
+            if (!isStoreOpen()) { showNotification("CLOSED: OPEN 5PM - 2:45AM"); return; }
             const emailValue = document.getElementById('cust-email').value;
-            const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-            
-            if (!gmailRegex.test(emailValue)) { showNotification("Error: Must be @gmail.com"); return; }
-
+            if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(emailValue)) { showNotification("Error: Must be @gmail.com"); return; }
             const btn = document.getElementById('order-btn');
-            btn.innerText = "PLACING ORDER...";
-            btn.disabled = true;
-
+            btn.innerText = "PLACING ORDER..."; btn.disabled = true;
             setTimeout(() => {
                 const orderId = "DASH-" + Date.now().toString().slice(-4);
-                const name = document.getElementById('cust-name').value;
-                const phone = document.getElementById('cust-phone').value;
-                const address = document.getElementById('cust-address').value;
-                
                 const subtotal = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
                 const total = Math.round(subtotal - (subtotal * appliedDiscount));
-
-                const itemDetails = cart.map(i => `${i.qty}x ${PIZZAS.find(p=>p.id===i.id).name} (${i.size}) - Rs. ${i.price * i.qty}`).join('\n');
-
-                const templateParams = { 
-                    order_id: orderId, 
-                    customer_name: name, 
-                    customer_phone: phone, 
-                    customer_email: emailValue, 
-                    delivery_address: address, 
-                    item_details: itemDetails + (appliedDiscount > 0 ? `\n(Applied welcome10% Promo)` : ''), 
-                    total_price: total 
-                };
-                
-                emailjs.send('service_xzcd8eq', 'template_cl3np7j', templateParams);
-
-                orders.unshift({ id: orderId, items: [...cart], total: total, timestamp: Date.now(), customer: { name, phone, email: emailValue, address } });
-                unreadOrdersCount++;
-                cart = []; 
-                appliedDiscount = 0; 
-                saveState(); 
-                router(); 
-                showOrderTimerPopup();
+                const itemDetails = cart.map(i => `${i.qty}x ${PIZZAS.find(p=>p.id===i.id).name} (${i.size})`).join('\n');
+                emailjs.send('service_xzcd8eq', 'template_cl3np7j', { order_id: orderId, customer_name: document.getElementById('cust-name').value, customer_phone: document.getElementById('cust-phone').value, customer_email: emailValue, delivery_address: document.getElementById('cust-address').value, item_details: itemDetails, total_price: total });
+                orders.unshift({ id: orderId, items: [...cart], total: total, timestamp: Date.now(), customer: { name: document.getElementById('cust-name').value, phone: document.getElementById('cust-phone').value, email: emailValue, address: document.getElementById('cust-address').value } });
+                unreadOrdersCount++; cart = []; appliedDiscount = 0; saveState(); router(); showOrderTimerPopup();
             }, 2000);
         };
     }
