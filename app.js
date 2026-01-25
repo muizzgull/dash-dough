@@ -6,7 +6,7 @@ const PIZZAS = [
     { id: 5, name: "Dynamite Ranch", category: "Premium", prices: { Regular: 900, Party: 1750 }, img: "dynamite-ranch.png", desc: "Pizza with Chicken and Cheese." },
     { id: 6, name: "Double Dough American Heat", category: "Double Dough", prices: { standard: 2100 }, img: "american-heat.png", desc: "Pizza with Jalapenos, Fiery sauce and Cheese." },
     { id: 7, name: "Double Dough Smokey Wheel", category: "Double Dough", prices: { standard: 2100 }, img: "smoky-wheel.png", desc: "Pizza with Jalapenos, Fiery sauce and Cheese." },
-    { id: 8, name: "Double Dough Extreme Kababish", category: "Double Dough", prices: { standard: 2100 }, img: "extreme-kababish.png", desc: "Pizza with Seekh Kabab and Cheese on Dough." },
+    { id: 8, name: "Double Dough Extreme Kababish", category: "Double Dough", prices: { standard: 2100 }, img: "smoky-wheel.png", desc: "Pizza with Seekh Kabab and Cheese on Dough." },
     { id: 9, name: "Double Dough Mughlai Pizza", category: "Double Dough", prices: { standard: 2100 }, img: "mughlai-pizza.png", desc: "Pizza with Creamy Sauce, with Cheese." },
     { id: 10, name: "Double Dough Dynamite Ranch", category: "Double Dough", prices: { standard: 2100 }, img: "dynamite-ranch.png", desc: "Pizza with Chicken and Cheese." },
     { id: 11, name: "10 Pcs Buzz Bites", category: "Others", prices: { Standard: 500 }, img: "buzz-bites.png", desc: "Golden chicken, dip it in the sauce." },
@@ -20,6 +20,9 @@ let unreadOrdersCount = parseInt(localStorage.getItem('dash_unread_orders')) || 
 let appliedDiscount = 0; 
 
 function saveState() {
+    if (cart.length === 0) {
+        appliedDiscount = 0;
+    }
     localStorage.setItem('dash_cart', JSON.stringify(cart));
     localStorage.setItem('dash_orders', JSON.stringify(orders));
     localStorage.setItem('dash_unread_orders', unreadOrdersCount);
@@ -154,8 +157,11 @@ window.updateMenuQty = (id, delta) => {
 
 function CartView() {
     if (cart.length === 0) return `<div class="text-center py-20 uppercase font-black opacity-20"><h2>Cart Empty</h2></div>`;
+    
     let subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
-    let finalTotal = subtotal - (subtotal * appliedDiscount);
+    let discountAmount = subtotal * appliedDiscount;
+    let finalTotal = subtotal - discountAmount;
+
     return `<div class="max-w-4xl mx-auto px-2"><h2 class="text-3xl font-black uppercase mb-10">Your Cart</h2><div id="cart-items-container">
         ${cart.map(item => {
             const pizza = PIZZAS.find(p => p.id === item.id);
@@ -170,7 +176,26 @@ function CartView() {
             <button onclick="applyPromo()" class="w-full md:w-40 bg-[#154BD1] text-white py-4 rounded-xl font-black uppercase">Apply</button>
         </div>
         <div class="bg-[#154BD1] text-[#F3F2D4] p-8 rounded-[2rem] mt-6">
-            <h3 class="text-2xl font-black mb-6 uppercase">Total: Rs. ${finalTotal.toFixed(0)}</h3>
+            <div class="mb-6 space-y-2 border-b border-white/20 pb-4">
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-bold uppercase opacity-70">Subtotal</span>
+                    <span class="font-black">Rs. ${subtotal}</span>
+                </div>
+                ${appliedDiscount > 0 ? `
+                <div class="flex justify-between items-center text-green-300">
+                    <span class="text-sm font-bold uppercase">Promo (10% Off)</span>
+                    <span class="font-black">- Rs. ${discountAmount.toFixed(0)}</span>
+                </div>` : ''}
+            </div>
+            
+            <div class="mb-4">
+                <p class="text-[10px] font-black uppercase opacity-60 tracking-widest mb-1">Notice</p>
+                <p class="text-xs font-bold uppercase">Online payment coming soon. <br> Delivery charges will be applied upon confirmation.</p>
+            </div>
+            <h3 class="text-2xl font-black mb-6 uppercase flex items-baseline gap-2">
+                Total: Rs. ${finalTotal.toFixed(0)} 
+                <span class="text-xs opacity-70 font-bold italic">+ Delivery Charges</span>
+            </h3>
             <form id="order-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input type="text" id="cust-name" placeholder="Full Name" required class="p-4 rounded-xl text-[#154BD1] font-bold">
                 <input type="text" id="cust-phone" placeholder="Phone" required class="p-4 rounded-xl text-[#154BD1] font-bold">
@@ -184,8 +209,18 @@ function CartView() {
 
 window.applyPromo = () => {
     const code = document.getElementById('promo-input').value.trim().toLowerCase();
-    if (code === "welcome10%") { appliedDiscount = 0.10; showNotification("10% DISCOUNT APPLIED!"); router(false); } 
-    else { showNotification("INVALID PROMO CODE"); }
+    
+    if (code === "welcome10%") {
+        if (appliedDiscount > 0) {
+            showNotification("PROMO CODE IS ALREADY APPLIED");
+        } else {
+            appliedDiscount = 0.10;
+            showNotification("10% DISCOUNT APPLIED!");
+            router(false);
+        }
+    } else {
+        showNotification("INVALID PROMO CODE");
+    }
 };
 
 function OrdersView() {
@@ -198,9 +233,19 @@ function renderOrdersList() {
     return orders.map(order => {
         const timeLeft = Math.max(0, 300000 - (now - order.timestamp));
         const min = Math.floor(timeLeft / 60000), sec = Math.floor((timeLeft % 60000) / 1000);
+        
+        const orderItemsHtml = order.items.map(item => {
+            const pizza = PIZZAS.find(p => p.id === item.id);
+            return `<div class="text-[11px] font-bold opacity-80 uppercase">${item.qty}x ${pizza ? pizza.name : 'Pizza'} (${item.size})</div>`;
+        }).join("");
+
         return `<div class="bg-white p-6 rounded-3xl mb-6 shadow-md border-l-8 border-[#154BD1]">
             <div class="flex justify-between items-start">
-                <div><p class="text-[10px] opacity-40 font-black uppercase">ID: ${order.id}</p><p class="text-xl font-black">Rs. ${order.total}</p></div>
+                <div>
+                    <p class="text-[10px] opacity-40 font-black uppercase">ID: ${order.id}</p>
+                    <div class="my-2 border-y border-gray-100 py-2">${orderItemsHtml}</div>
+                    <p class="text-xl font-black">Rs. ${order.total}</p>
+                </div>
                 <div class="text-right">
                     ${timeLeft > 0 ? `<p class="text-xs text-red-500 font-black uppercase animate-pulse">${min}:${sec < 10 ? '0' : ''}${sec}</p><button onclick="askCancelOrder('${order.id}')" class="bg-red-500 text-white px-4 py-1 rounded-lg text-[10px] font-black uppercase mt-1">Cancel</button>` : `<span class="bg-green-100 text-green-600 px-4 py-2 rounded-xl font-black uppercase text-xs">Confirmed</span>`}
                 </div>
@@ -217,20 +262,23 @@ window.addToCart = (id) => {
 
 function openSizeModal(pizza) {
     const menuQty = parseInt(document.getElementById(`menu-qty-${pizza.id}`).innerText);
-    const modal = document.createElement('div'); modal.id = 'modal-overlay';
+    const modal = document.createElement('div'); 
+    modal.id = 'modal-overlay';
+    modal.className = "fixed inset-0 z-[1000] flex items-center justify-center bg-transparent pointer-events-auto";
     
     let buttons = Object.entries(pizza.prices).map(([size, price]) => {
         let servingText = "";
         if (size.toLowerCase() === "regular") servingText = `<div class="text-[10px] opacity-70">Serving for 1-2 people</div>`;
         if (size.toLowerCase() === "party") servingText = `<div class="text-[10px] opacity-70">Serving for 3-4 people</div>`;
         
-        return `<button onclick="confirmAddToCart(${pizza.id}, '${size}', ${price}, ${menuQty})" class="w-full p-4 rounded-2xl border-2 border-[#154BD1] text-[#154BD1] font-black mb-2 hover:bg-[#154BD1] hover:text-[#F3F2D4] transition uppercase">
+        return `<button onclick="confirmAddToCart(${pizza.id}, '${size}', ${price}, ${menuQty})" class="w-full p-4 rounded-2xl border-2 border-[#154BD1] text-[#154BD1] font-black mb-2 hover:bg-[#154BD1] hover:text-[#F3F2D4] transition uppercase bg-white">
             ${size} - Rs. ${price}
             ${servingText}
         </button>`;
     }).join('');
 
-    modal.innerHTML = `<div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl animate-pop text-center">
+    modal.innerHTML = `
+    <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl animate-pop text-center border-4 border-[#154BD1]">
         <h2 class="text-2xl font-black mb-1 uppercase text-[#154BD1]">${pizza.name}</h2>
         <p class="text-xs font-bold opacity-60 mb-6">Quantity: ${menuQty}</p>
         ${buttons}
@@ -259,8 +307,15 @@ window.removeItem = (id, size) => {
 };
 
 window.askCancelOrder = (orderId) => {
-    const modal = document.createElement('div'); modal.id = 'modal-overlay';
-    modal.innerHTML = `<div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl animate-pop text-center"><h2 class="text-2xl font-black mb-4 uppercase text-red-500">Cancel Order?</h2><button onclick="processCancellation('${orderId}')" id="confirm-cancel-btn" class="w-full bg-red-500 text-white py-4 rounded-xl font-black uppercase mb-3">Yes, Cancel</button><button onclick="closeModal()" class="w-full text-xs font-black opacity-30 uppercase">No</button></div>`;
+    const modal = document.createElement('div'); 
+    modal.id = 'modal-overlay';
+    modal.className = "fixed inset-0 z-[1000] flex items-center justify-center bg-transparent pointer-events-auto";
+    modal.innerHTML = `
+    <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl animate-pop text-center border-4 border-red-500">
+        <h2 class="text-2xl font-black mb-4 uppercase text-red-500">Cancel Order?</h2>
+        <button onclick="processCancellation('${orderId}')" id="confirm-cancel-btn" class="w-full bg-red-500 text-white py-4 rounded-xl font-black uppercase mb-3">Yes, Cancel</button>
+        <button onclick="closeModal()" class="w-full text-xs font-black opacity-30 uppercase">No</button>
+    </div>`;
     document.body.appendChild(modal);
 };
 
@@ -269,17 +324,30 @@ window.processCancellation = (orderId) => {
     btn.innerText = "CANCELLING..."; btn.disabled = true;
     setTimeout(() => {
         const order = orders.find(o => o.id === orderId);
-        emailjs.send('service_cnt6ztg', 'template_b565tos', { order_id: order.id, customer_name: order.customer.name, total_price: order.total });
+        emailjs.send('service_g7du1xb', 'template_rf9qcz8', { order_id: order.id, customer_name: order.customer.name, total_price: order.total });
         orders = orders.filter(o => o.id !== orderId);
         saveState(); router(false); closeModal(); showNotification("Order Cancelled!");
     }, 1500);
 };
 
 function showNotification(msg) {
-    const container = document.getElementById('notification-area');
-    const el = document.createElement('div'); el.className = `notification-box animate-pop`;
-    el.innerText = msg.toUpperCase(); container.appendChild(el);
-    setTimeout(() => { el.remove(); }, 2000);
+    const existing = document.querySelectorAll('.notification-box');
+    existing.forEach(el => el.remove());
+
+    const el = document.createElement('div');
+    el.className = `notification-box fixed inset-0 flex items-center justify-center z-[9999] pointer-events-none bg-transparent`;
+    
+    el.innerHTML = `
+        <div class="bg-[#154BD1] text-white px-8 py-4 rounded-2xl shadow-2xl font-black uppercase animate-pop pointer-events-auto">
+            ${msg}
+        </div>
+    `;
+    
+    document.body.appendChild(el);
+    setTimeout(() => { 
+        el.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+        setTimeout(() => el.remove(), 500);
+    }, 2000);
 }
 
 function showOrderTimerPopup() {
@@ -305,12 +373,28 @@ function attachListeners() {
             if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(emailValue)) { showNotification("Error: Must be @gmail.com"); return; }
             const btn = document.getElementById('order-btn');
             btn.innerText = "PLACING ORDER..."; btn.disabled = true;
+            
             setTimeout(() => {
-                const orderId = "DASH-" + Date.now().toString().slice(-4);
+                // NEW UNIQUE ID LOGIC: "DASH-" + Timestamp + Random String
+                const orderId = "DASH-" + Date.now().toString().slice(-6) + Math.random().toString(36).substring(2, 5).toUpperCase();
+                
                 const subtotal = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
                 const total = Math.round(subtotal - (subtotal * appliedDiscount));
                 const itemDetails = cart.map(i => `${i.qty}x ${PIZZAS.find(p=>p.id===i.id).name} (${i.size})`).join('\n');
-                emailjs.send('service_cnt6ztg', 'template_75mtv5m', { order_id: orderId, customer_name: document.getElementById('cust-name').value, customer_phone: document.getElementById('cust-phone').value, customer_email: emailValue, delivery_address: document.getElementById('cust-address').value, item_details: itemDetails, total_price: total });
+                
+                const promoStatusText = appliedDiscount > 0 ? "PROMO APPLIED: 10% DISCOUNT (WELCOME10%)" : "NO PROMO CODE USED";
+
+                emailjs.send('service_g7du1xb', 'template_4xyaqxx', { 
+                    order_id: orderId, 
+                    customer_name: document.getElementById('cust-name').value, 
+                    customer_phone: document.getElementById('cust-phone').value, 
+                    customer_email: emailValue, 
+                    delivery_address: document.getElementById('cust-address').value, 
+                    item_details: itemDetails, 
+                    total_price: total,
+                    promo_status: promoStatusText 
+                });
+
                 orders.unshift({ id: orderId, items: [...cart], total: total, timestamp: Date.now(), customer: { name: document.getElementById('cust-name').value, phone: document.getElementById('cust-phone').value, email: emailValue, address: document.getElementById('cust-address').value } });
                 unreadOrdersCount++; cart = []; appliedDiscount = 0; saveState(); router(true); showOrderTimerPopup();
             }, 2000);
