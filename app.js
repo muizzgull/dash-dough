@@ -52,7 +52,7 @@ function renderFloatingCart() {
     const totalPrice = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
 
     barContainer.innerHTML = `
-        <div class="pointer-events-auto cursor-pointer flex flex-col items-center mb-6" onclick="location.hash='#/cart'">
+        <div class="pointer-events-auto cursor-pointer flex flex-col items-center mb-1" onclick="location.hash='#/cart'">
             <div class="w-24 h-24 md:w-32 md:h-32 bg-[#154BD1] text-[#F3F2D4] rounded-[2.5rem] shadow-[0_20px_50px_rgba(21,75,209,0.5)] flex flex-col items-center justify-center border-4 border-white transform transition duration-300 hover:scale-110 active:scale-95">
                 <div class="relative mb-1">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 md:h-9 md:w-9" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
@@ -104,14 +104,12 @@ function renderFooter() {
             </div>
             <div>
                 <h4 class="text-xs font-black uppercase mb-6 opacity-40">Contact</h4>
-                <p class="font-black text-lg opacity-80">0300-1234567</p>
+                <p class="font-black text-lg opacity-80">0370-3302022</p>
                 <p class="font-bold opacity-70">dashdough4@gmail.com</p>
             </div>
         </div>
     </footer>`;
 }
-
-// ... (Keep the rest of your app.js logic as is)
 
 function HomeView() {
     let html = `<header class="mb-10 px-0"><div class="w-full mt-10 h-[180px] rounded-2xl md:h-[300px] flex items-center justify-center bg-[#D89000]"><img src="hero-img.jpeg" alt="Banner" class="max-w-full max-h-full object-contain"></div></header>`;
@@ -148,8 +146,6 @@ function HomeView() {
     });
     return html;
 }
-
-// ... (Keep the rest of your app.js logic as is)
 
 window.updateMenuQty = (id, delta) => {
     const el = document.getElementById(`menu-qty-${id}`);
@@ -222,9 +218,18 @@ window.addToCart = (id) => {
 function openSizeModal(pizza) {
     const menuQty = parseInt(document.getElementById(`menu-qty-${pizza.id}`).innerText);
     const modal = document.createElement('div'); modal.id = 'modal-overlay';
-    let buttons = Object.entries(pizza.prices).map(([size, price]) =>
-        `<button onclick="confirmAddToCart(${pizza.id}, '${size}', ${price}, ${menuQty})" class="w-full p-4 rounded-2xl border-2 border-[#154BD1] text-[#154BD1] font-black mb-2 hover:bg-[#154BD1] hover:text-[#F3F2D4] transition uppercase">${size} - Rs. ${price}</button>`
-    ).join('');
+    
+    let buttons = Object.entries(pizza.prices).map(([size, price]) => {
+        let servingText = "";
+        if (size.toLowerCase() === "regular") servingText = `<div class="text-[10px] opacity-70">Serving for 1-2 people</div>`;
+        if (size.toLowerCase() === "party") servingText = `<div class="text-[10px] opacity-70">Serving for 3-4 people</div>`;
+        
+        return `<button onclick="confirmAddToCart(${pizza.id}, '${size}', ${price}, ${menuQty})" class="w-full p-4 rounded-2xl border-2 border-[#154BD1] text-[#154BD1] font-black mb-2 hover:bg-[#154BD1] hover:text-[#F3F2D4] transition uppercase">
+            ${size} - Rs. ${price}
+            ${servingText}
+        </button>`;
+    }).join('');
+
     modal.innerHTML = `<div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl animate-pop text-center">
         <h2 class="text-2xl font-black mb-1 uppercase text-[#154BD1]">${pizza.name}</h2>
         <p class="text-xs font-bold opacity-60 mb-6">Quantity: ${menuQty}</p>
@@ -264,7 +269,7 @@ window.processCancellation = (orderId) => {
     btn.innerText = "CANCELLING..."; btn.disabled = true;
     setTimeout(() => {
         const order = orders.find(o => o.id === orderId);
-        emailjs.send('service_xzcd8eq', 'template_sla381a', { order_id: order.id, customer_name: order.customer.name, total_price: order.total });
+        emailjs.send('service_cnt6ztg', 'template_b565tos', { order_id: order.id, customer_name: order.customer.name, total_price: order.total });
         orders = orders.filter(o => o.id !== orderId);
         saveState(); router(false); closeModal(); showNotification("Order Cancelled!");
     }, 1500);
@@ -305,7 +310,7 @@ function attachListeners() {
                 const subtotal = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
                 const total = Math.round(subtotal - (subtotal * appliedDiscount));
                 const itemDetails = cart.map(i => `${i.qty}x ${PIZZAS.find(p=>p.id===i.id).name} (${i.size})`).join('\n');
-                emailjs.send('service_xzcd8eq', 'template_cl3np7j', { order_id: orderId, customer_name: document.getElementById('cust-name').value, customer_phone: document.getElementById('cust-phone').value, customer_email: emailValue, delivery_address: document.getElementById('cust-address').value, item_details: itemDetails, total_price: total });
+                emailjs.send('service_cnt6ztg', 'template_75mtv5m', { order_id: orderId, customer_name: document.getElementById('cust-name').value, customer_phone: document.getElementById('cust-phone').value, customer_email: emailValue, delivery_address: document.getElementById('cust-address').value, item_details: itemDetails, total_price: total });
                 orders.unshift({ id: orderId, items: [...cart], total: total, timestamp: Date.now(), customer: { name: document.getElementById('cust-name').value, phone: document.getElementById('cust-phone').value, email: emailValue, address: document.getElementById('cust-address').value } });
                 unreadOrdersCount++; cart = []; appliedDiscount = 0; saveState(); router(true); showOrderTimerPopup();
             }, 2000);
