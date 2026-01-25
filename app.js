@@ -11,7 +11,7 @@ const PIZZAS = [
     { id: 10, name: "Double Dough Dynamite Ranch", category: "Double Dough", prices: { standard: 2100 }, img: "dynamite-ranch.png", desc: "Pizza with Chicken and Cheese." },
     { id: 11, name: "10 Pcs Buzz Bites", category: "Others", prices: { Standard: 500 }, img: "buzz-bites.png", desc: "Golden chicken, dip it in the sauce." },
     { id: 12, name: "Small Chocolate Pizza", category: "Others", prices: { Standard: 500 }, img: "chocolate-pizza.png", desc: "Mini Pizza with Chocolate over it." },
-    { id: 13, name: "Baked Drummet", category: "Others", prices: { "6 Pieces": 370, "10 Pieces": 1000 }, img: "baked-drummet.png", desc: "Oven-baked chicken drummets seasoned to perfection." }
+    { id: 13, name: "Baked Drummet", category: "Others", prices: { "6 Pieces": 370, "10 Pieces": 1000 }, img: "baked-drummet.png", desc: "Oven-baked chicken drummets." }
 ];
 
 let cart = JSON.parse(localStorage.getItem('dash_cart')) || [];
@@ -39,58 +39,61 @@ function isStoreOpen() {
     const pkTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Karachi"}));
     const hours = pkTime.getHours();
     const minutes = pkTime.getMinutes();
-    const currentTimeInMinutes = hours * 60 + minutes;
-    const openingTime = 17 * 60; // 5 PM
-    const closingTime = (2 * 60) + 45; // 2:45 AM
-    return (currentTimeInMinutes >= openingTime || currentTimeInMinutes <= closingTime);
+    const totalMinutes = hours * 60 + minutes;
+    return (totalMinutes >= 1020 || totalMinutes <= 165); 
 }
 
 function renderFloatingCart() {
     const barContainer = document.getElementById('floating-cart-bar');
     if (!barContainer) return;
-    
-    if (cart.length === 0 || window.location.hash === "#/cart") {
-        barContainer.innerHTML = "";
-        return;
-    }
+    if (cart.length === 0 || window.location.hash === "#/cart") { barContainer.innerHTML = ""; return; }
 
     const totalQty = cart.reduce((acc, item) => acc + item.qty, 0);
     const totalPrice = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
 
-    // This creates a beautiful square "Action Card" centered at the bottom
     barContainer.innerHTML = `
-        <div class="group pointer-events-auto cursor-pointer flex flex-col items-center" onclick="location.hash='#/cart'">
-            <div class="w-24 h-24 md:w-28 md:h-28 bg-[#154BD1] text-[#F3F2D4] rounded-[2rem] shadow-[0_20px_50px_rgba(21,75,209,0.3)] flex flex-col items-center justify-center border-4 border-white transform transition-all duration-300 hover:scale-110 active:scale-95">
+        <div class="pointer-events-auto cursor-pointer flex flex-col items-center mb-6" onclick="location.hash='#/cart'">
+            <div class="w-24 h-24 md:w-32 md:h-32 bg-[#154BD1] text-[#F3F2D4] rounded-[2.5rem] shadow-[0_20px_50px_rgba(21,75,209,0.5)] flex flex-col items-center justify-center border-4 border-white transform transition duration-300 hover:scale-110 active:scale-95">
                 <div class="relative mb-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 md:h-8 md:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                    <span class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-black border-2 border-[#154BD1]">${totalQty}</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 md:h-9 md:w-9" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                    <span class="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] md:text-xs w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center font-black border-2 border-[#154BD1]">${totalQty}</span>
                 </div>
-                <span class="font-black text-[10px] uppercase tracking-tighter mb-1">View Cart</span>
-                <span class="font-black text-xs md:text-sm">Rs. ${totalPrice}</span>
+                <span class="font-black text-[10px] md:text-xs uppercase tracking-tighter mb-1">View Cart</span>
+                <span class="font-black text-xs md:text-base">Rs. ${totalPrice}</span>
             </div>
-        </div>
-    `;
+        </div>`;
 }
 
-const router = () => {
+const router = (withAnimation = true) => {
+    const wave = document.getElementById('wave-transition');
     const routes = [{ path: "#/", view: HomeView }, { path: "#/cart", view: CartView }, { path: "#/orders", view: OrdersView }];
-    const currentHash = location.hash || "#/";
-    const match = routes.find(r => r.path === currentHash) || routes[0];
-    window.scrollTo(0, 0);
-    document.getElementById("app").innerHTML = `<main class="min-h-screen pb-32">${match.view()}</main>${renderFooter()}`;
-    saveState();
-    attachListeners();
+    const match = routes.find(r => r.path === (location.hash || "#/")) || routes[0];
+
+    if (withAnimation && wave) {
+        wave.classList.remove('wave-active');
+        void wave.offsetWidth; 
+        wave.classList.add('wave-active');
+        setTimeout(() => {
+            window.scrollTo(0, 0);
+            document.getElementById("app").innerHTML = `<main class="min-h-screen pb-32">${match.view()}</main>${renderFooter()}`;
+            saveState();
+            attachListeners();
+        }, 500); 
+    } else {
+        document.getElementById("app").innerHTML = `<main class="min-h-screen pb-32">${match.view()}</main>${renderFooter()}`;
+        saveState();
+        attachListeners();
+    }
 };
 
-window.addEventListener("hashchange", router);
-window.addEventListener("load", router);
+window.addEventListener("hashchange", () => router(true));
+window.addEventListener("load", () => router(true));
+setInterval(() => { if (location.hash === '#/orders') router(false); }, 1000);
 
 function renderFooter() {
     return `<footer class="mt-20 border-t-4 border-[#154BD1] bg-white rounded-t-[3rem] pt-16 pb-8 px-6">
         <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 text-[#154BD1]">
-            <div><a href="#/" class="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-4 block">Dash Dough</a></div>
+            <div><a href="#/" class="text-3xl md:text-4xl font-black uppercase mb-4 block">Dash Dough</a></div>
             <div>
                 <h4 class="text-xs font-black uppercase mb-6 opacity-40">Links</h4>
                 <ul class="flex flex-col gap-3 font-bold uppercase">
@@ -108,35 +111,34 @@ function renderFooter() {
     </footer>`;
 }
 
+// ... (Keep the rest of your app.js logic as is)
+
 function HomeView() {
-    let html = `<header class="mb-10 px-0"><div class="w-full mt-10 h-[180px] rounded-2xl md:h-[300px] flex items-center justify-center" style="background-color: #D89000;"><img src="hero-img.jpeg" alt="Banner" class="max-w-full max-h-full object-contain block"></div></header>`;
-                
+    let html = `<header class="mb-10 px-0"><div class="w-full mt-10 h-[180px] rounded-2xl md:h-[300px] flex items-center justify-center bg-[#D89000]"><img src="hero-img.jpeg" alt="Banner" class="max-w-full max-h-full object-contain"></div></header>`;
     ["Classic", "Premium", "Double Dough", "Others"].forEach(cat => {
-        html += `<section class="mb-20 px-2 md:px-4">
-                    <h2 class="text-2xl md:text-3xl font-bold mb-10 border-b-2 border-[#154BD1] inline-block pb-2 uppercase ml-2">${cat}</h2>
-                    <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-10">`;
-        
+        html += `<section class="mb-20 px-2 md:px-4"><h2 class="text-2xl md:text-3xl font-bold mb-10 border-b-2 border-[#154BD1] inline-block pb-2 uppercase ml-2">${cat}</h2><div class="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-10">`;
         PIZZAS.filter(p => p.category === cat).forEach(pizza => {
             const minPrice = Math.min(...Object.values(pizza.prices));
-            
-            // LOGIC: Show "FROM" if it's Classic, Premium, OR the Baked Drummet
             const showFrom = (cat === "Classic" || cat === "Premium" || pizza.name === "Baked Drummet");
-            const priceLabel = showFrom ? `FROM RS. ${minPrice}` : `RS. ${minPrice}`;
-
+            
             html += `<div class="pizza-card bg-yellow-400 rounded-2xl overflow-hidden shadow-2xl border-2 border-white hover:border-[#154BD1] transition flex flex-col">
-                <div class="p-3 md:p-5"><div class="bg-gray-50 rounded-2xl flex items-center justify-center"><img src="${pizza.img}" class="w-full bg-yellow-400 rounded-2xl h-32 md:h-56 object-contain"></div></div>
-                <div class="p-4 md:p-8 pt-0 md:pt-0 flex-grow flex flex-col justify-between">
-                    <div>
-                        <div class="flex flex-col mb-2">
-                             <h3 class="text-sm md:text-2xl font-black uppercase line-clamp-2">${pizza.name}</h3>
-                             <p class="text-[10px] md:text-[12px] font-black bg-white px-3 py-3 rounded-md shadow-sm w-fit mt-1 uppercase">${priceLabel}</p>
-                        </div>
-                        <p class="text-[10px] md:text-xs font-bold opacity-80 mb-4 line-clamp-2">${pizza.desc}</p>
+                <div class="p-3 md:p-5">
+                    <div class="rounded-2xl flex items-center justify-center bg-yellow-400 img-container">
+                        <img src="${pizza.img}" class="w-full h-32 md:h-56 object-contain png-fix" loading="lazy">
                     </div>
-                    <div class="flex items-center justify-between gap-2 mb-4 bg-gray-100 p-2 rounded-xl">
-                        <button onclick="updateMenuQty(${pizza.id}, -1)" class="w-8 h-8 flex items-center justify-center bg-white rounded-lg font-black text-[#154BD1] shadow-sm">-</button>
+                </div>
+                <div class="p-4 md:p-8 pt-0 flex-grow flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm md:text-2xl font-black uppercase">${pizza.name}</h3>
+                        <p class="text-[10px] md:text-[12px] font-black bg-white px-3 py-3 rounded-md w-fit mt-1 uppercase">
+                            ${showFrom ? 'FROM ' : ''}RS. ${minPrice}
+                        </p>
+                        <p class="text-[10px] md:text-xs font-bold opacity-80 my-4 line-clamp-2">${pizza.desc}</p>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 mb-4 bg-white/50 p-2 rounded-xl">
+                        <button onclick="updateMenuQty(${pizza.id}, -1)" class="w-8 h-8 flex items-center justify-center bg-white rounded-lg font-black">-</button>
                         <span id="menu-qty-${pizza.id}" class="font-black text-lg">1</span>
-                        <button onclick="updateMenuQty(${pizza.id}, 1)" class="w-8 h-8 flex items-center justify-center bg-white rounded-lg font-black text-[#154BD1] shadow-sm">+</button>
+                        <button onclick="updateMenuQty(${pizza.id}, 1)" class="w-8 h-8 flex items-center justify-center bg-white rounded-lg font-black">+</button>
                     </div>
                     <button onclick="addToCart(${pizza.id})" class="w-full bg-[#154BD1] text-[#F3F2D4] py-2 md:py-4 rounded-xl font-black uppercase">Add to Cart</button>
                 </div>
@@ -147,29 +149,23 @@ function HomeView() {
     return html;
 }
 
+// ... (Keep the rest of your app.js logic as is)
+
 window.updateMenuQty = (id, delta) => {
     const el = document.getElementById(`menu-qty-${id}`);
-    let current = parseInt(el.innerText);
-    current = Math.max(1, current + delta);
-    el.innerText = current;
+    if(el) el.innerText = Math.max(1, parseInt(el.innerText) + delta);
 };
 
 function CartView() {
     if (cart.length === 0) return `<div class="text-center py-20 uppercase font-black opacity-20"><h2>Cart Empty</h2></div>`;
     let subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
     let finalTotal = subtotal - (subtotal * appliedDiscount);
-
-    return `<div class="max-w-4xl mx-auto px-2">
-        <h2 class="text-3xl font-black uppercase mb-10">Your Cart</h2>
-        <div id="cart-items-container">
+    return `<div class="max-w-4xl mx-auto px-2"><h2 class="text-3xl font-black uppercase mb-10">Your Cart</h2><div id="cart-items-container">
         ${cart.map(item => {
             const pizza = PIZZAS.find(p => p.id === item.id);
-            return `<div id="item-${item.id}-${item.size.replace(/\s/g, '')}" class="flex items-center justify-between bg-white p-4 rounded-2xl mb-4 shadow-sm">
-                <div class="flex items-center gap-4"><img src="${pizza.img}" class="w-16 h-16 rounded-lg object-contain bg-gray-50"><div><h4 class="text-xs md:text-xl font-black uppercase">${pizza.name} [${item.size}]</h4><p class="font-bold opacity-60">Rs. ${item.price}</p></div></div>
-                <div class="flex items-center gap-4">
-                    <button onclick="changeQty(${item.id}, '${item.size}', -1)" class="font-black px-2">-</button><span class="font-black">${item.qty}</span><button onclick="changeQty(${item.id}, '${item.size}', 1)" class="font-black px-2">+</button>
-                    <button onclick="removeItem(${item.id}, '${item.size}')" class="text-red-500 font-bold ml-4">✕</button>
-                </div>
+            return `<div class="flex items-center justify-between bg-white p-4 rounded-2xl mb-4 shadow-sm">
+                <div class="flex items-center gap-4"><img src="${pizza.img}" class="w-16 h-16 object-contain png-fix"><div><h4 class="text-xs md:text-xl font-black uppercase">${pizza.name} [${item.size}]</h4><p class="font-bold opacity-60">Rs. ${item.price}</p></div></div>
+                <div class="flex items-center gap-4"><button onclick="changeQty(${item.id}, '${item.size}', -1)" class="font-black px-2">-</button><span class="font-black">${item.qty}</span><button onclick="changeQty(${item.id}, '${item.size}', 1)" class="font-black px-2">+</button><button onclick="removeItem(${item.id}, '${item.size}')" class="text-red-500 font-bold ml-4">✕</button></div>
             </div>`;
         }).join("")}
         </div>
@@ -192,7 +188,7 @@ function CartView() {
 
 window.applyPromo = () => {
     const code = document.getElementById('promo-input').value.trim().toLowerCase();
-    if (code === "welcome10%") { appliedDiscount = 0.10; showNotification("10% DISCOUNT APPLIED!"); router(); } 
+    if (code === "welcome10%") { appliedDiscount = 0.10; showNotification("10% DISCOUNT APPLIED!"); router(false); } 
     else { showNotification("INVALID PROMO CODE"); }
 };
 
@@ -207,7 +203,7 @@ function renderOrdersList() {
         const timeLeft = Math.max(0, 300000 - (now - order.timestamp));
         const min = Math.floor(timeLeft / 60000), sec = Math.floor((timeLeft % 60000) / 1000);
         return `<div class="bg-white p-6 rounded-3xl mb-6 shadow-md border-l-8 border-[#154BD1]">
-            <div class="flex justify-between items-start mb-4">
+            <div class="flex justify-between items-start">
                 <div><p class="text-[10px] opacity-40 font-black uppercase">ID: ${order.id}</p><p class="text-xl font-black">Rs. ${order.total}</p></div>
                 <div class="text-right">
                     ${timeLeft > 0 ? `<p class="text-xs text-red-500 font-black uppercase animate-pulse">${min}:${sec < 10 ? '0' : ''}${sec}</p><button onclick="askCancelOrder('${order.id}')" class="bg-red-500 text-white px-4 py-1 rounded-lg text-[10px] font-black uppercase mt-1">Cancel</button>` : `<span class="bg-green-100 text-green-600 px-4 py-2 rounded-xl font-black uppercase text-xs">Confirmed</span>`}
@@ -239,11 +235,8 @@ function openSizeModal(pizza) {
 }
 
 window.confirmAddToCart = (id, size, price, qty = 1) => {
-    if (typeof qty !== 'number') qty = parseInt(document.getElementById(`menu-qty-${id}`).innerText);
     const item = cart.find(i => i.id === id && i.size === size);
     if (item) item.qty += qty; else cart.push({ id, size, price, qty });
-    const menuQtyEl = document.getElementById(`menu-qty-${id}`);
-    if (menuQtyEl) menuQtyEl.innerText = 1;
     saveState(); closeModal(); showNotification("Added to Cart!");
 };
 
@@ -252,21 +245,17 @@ window.closeModal = () => { const m = document.getElementById('modal-overlay'); 
 window.changeQty = (id, size, delta) => {
     const item = cart.find(i => i.id === id && i.size === size);
     if (item) { item.qty += delta; if (item.qty <= 0) return removeItem(id, size); }
-    saveState(); router();
+    saveState(); router(false);
 };
 
 window.removeItem = (id, size) => {
     cart = cart.filter(i => !(i.id === id && i.size === size));
-    saveState(); router();
+    saveState(); router(false);
 };
 
 window.askCancelOrder = (orderId) => {
     const modal = document.createElement('div'); modal.id = 'modal-overlay';
-    modal.innerHTML = `<div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl animate-pop text-center">
-        <h2 class="text-2xl font-black mb-4 uppercase text-red-500">Cancel Order?</h2>
-        <button onclick="processCancellation('${orderId}')" id="confirm-cancel-btn" class="w-full bg-red-500 text-white py-4 rounded-xl font-black uppercase mb-3">Yes, Cancel</button>
-        <button onclick="closeModal()" class="w-full text-xs font-black opacity-30 uppercase">No</button>
-    </div>`;
+    modal.innerHTML = `<div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl animate-pop text-center"><h2 class="text-2xl font-black mb-4 uppercase text-red-500">Cancel Order?</h2><button onclick="processCancellation('${orderId}')" id="confirm-cancel-btn" class="w-full bg-red-500 text-white py-4 rounded-xl font-black uppercase mb-3">Yes, Cancel</button><button onclick="closeModal()" class="w-full text-xs font-black opacity-30 uppercase">No</button></div>`;
     document.body.appendChild(modal);
 };
 
@@ -277,13 +266,12 @@ window.processCancellation = (orderId) => {
         const order = orders.find(o => o.id === orderId);
         emailjs.send('service_xzcd8eq', 'template_sla381a', { order_id: order.id, customer_name: order.customer.name, total_price: order.total });
         orders = orders.filter(o => o.id !== orderId);
-        saveState(); router(); closeModal(); showNotification("Order Cancelled!");
+        saveState(); router(false); closeModal(); showNotification("Order Cancelled!");
     }, 1500);
 };
 
 function showNotification(msg) {
     const container = document.getElementById('notification-area');
-    if (!container) return;
     const el = document.createElement('div'); el.className = `notification-box animate-pop`;
     el.innerText = msg.toUpperCase(); container.appendChild(el);
     setTimeout(() => { el.remove(); }, 2000);
@@ -294,8 +282,7 @@ function showOrderTimerPopup() {
     const timerEl = document.createElement('div');
     timerEl.className = "fixed inset-0 m-auto flex flex-col items-center justify-center w-fit h-fit bg-[#154BD1] text-[#F3F2D4] px-10 py-5 rounded-3xl shadow-2xl z-[100] font-black uppercase animate-pop text-center min-w-[300px]";
     const updateHTML = () => { timerEl.innerHTML = `<div>ORDER PLACED!</div> <div class="text-3xl mt-1">${timeLeft}s</div>`; };
-    updateHTML();
-    document.body.appendChild(timerEl);
+    updateHTML(); document.body.appendChild(timerEl);
     const itv = setInterval(() => {
         timeLeft--;
         if (timeLeft <= 0) { clearInterval(itv); timerEl.remove(); location.hash = "#/orders"; }
@@ -320,9 +307,8 @@ function attachListeners() {
                 const itemDetails = cart.map(i => `${i.qty}x ${PIZZAS.find(p=>p.id===i.id).name} (${i.size})`).join('\n');
                 emailjs.send('service_xzcd8eq', 'template_cl3np7j', { order_id: orderId, customer_name: document.getElementById('cust-name').value, customer_phone: document.getElementById('cust-phone').value, customer_email: emailValue, delivery_address: document.getElementById('cust-address').value, item_details: itemDetails, total_price: total });
                 orders.unshift({ id: orderId, items: [...cart], total: total, timestamp: Date.now(), customer: { name: document.getElementById('cust-name').value, phone: document.getElementById('cust-phone').value, email: emailValue, address: document.getElementById('cust-address').value } });
-                unreadOrdersCount++; cart = []; appliedDiscount = 0; saveState(); router(); showOrderTimerPopup();
+                unreadOrdersCount++; cart = []; appliedDiscount = 0; saveState(); router(true); showOrderTimerPopup();
             }, 2000);
         };
     }
 }
-setInterval(() => { if (location.hash === '#/orders') router(); }, 1000);

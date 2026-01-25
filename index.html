@@ -16,10 +16,14 @@
 </head>
 <body class="bg-[#F3F2D4] text-[#154BD1] font-sans antialiased overflow-x-hidden">
 
+    <div id="wave-transition" class="fixed inset-0 bg-[#154BD1] z-[9999] translate-x-[-100%] pointer-events-none flex items-center justify-center">
+        <img src="dash-dough-logo.png" id="wave-logo" class="w-48 md:w-64 opacity-0 transition-opacity duration-300" alt="Loading Logo">
+    </div>
+
     <div id="notification-area"></div>
 
     <nav class="fixed top-0 w-full bg-[#154BD1] text-[#F3F2D4] py-3 px-3 md:px-8 flex justify-between items-center z-50 shadow-lg flex-nowrap">
-        <a href="#/"><img class="w-36 cursor-pointer" src="dash-dough-logo.png" alt=""></a>
+        <a href="#/"><img class="w-36 cursor-pointer" src="dash-dough-logo.png" alt="Logo"></a>
         <div class="flex items-center gap-4 md:gap-8 flex-nowrap">
             <a href="#/" class="hover:opacity-70 transition uppercase text-[11px] md:text-sm font-bold flex-shrink-0">Menu</a>
             <a href="#/orders" class="relative hover:opacity-70 transition uppercase text-[11px] md:text-sm font-bold flex-shrink-0 whitespace-nowrap">
@@ -37,7 +41,7 @@
 
     <div id="app" class="mt-20 md:mt-24 p-2 md:p-8 min-h-screen"></div>
 
-    <div id="floating-cart-bar" class="fixed bottom-8 left-0 w-full flex justify-center pointer-events-none z-[100]"></div>
+    <div id="floating-cart-bar" class="fixed bottom-6 left-0 w-full flex justify-center pointer-events-none z-[100]"></div>
 
     <script src="app.js"></script>
 </body>
