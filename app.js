@@ -1,6 +1,6 @@
 const PIZZAS = [
-    { id: 1, name: "American Heat", category: "Classic", prices: { Regular: 800, Party: 1550 }, img: "american-heat.png", desc: "Pizza with Jalapenos, Fiery sauce and Cheese." },
-    { id: 2, name: "Smokey Wheel", category: "Classic", prices: { Regular: 800, Party: 1550 }, img: "smoky-wheel.png", desc: "Pizza with Jalapenos, Fiery sauce and Cheese." },
+    { id: 1, name: "American Heat", category: "Classic", prices: { Regular: 800, Party: 1550 }, img: "american-heat.png", desc: "Pizza with Jalapenos, Sauce and Cheese." },
+    { id: 2, name: "Smokey Wheel", category: "Classic", prices: { Regular: 800, Party: 1550 }, img: "smoky-wheel.png", desc: "Pizza with Olives and Cheese." },
     { id: 3, name: "Extreme Kababish", category: "Premium", prices: { Regular: 900, Party: 1750 }, img: "extreme-kababish.png", desc: "Pizza with Seekh Kabab and Cheese on Dough." },
     { id: 4, name: "Mughlai Pizza", category: "Premium", prices: { Regular: 900, Party: 1750 }, img: "mughlai-pizza.png", desc: "Pizza with Creamy Sauce, with Cheese." },
     { id: 5, name: "Dynamite Ranch", category: "Premium", prices: { Regular: 900, Party: 1750 }, img: "dynamite-ranch.png", desc: "Pizza with Chicken and Cheese." },

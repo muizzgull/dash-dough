@@ -1,0 +1,7 @@
+Dash Dough Email Js Public Key:rDE44wwo3inrGdfKE
+
+Dash Dough Email Js Service Id:service_g7du1xb
+
+Dash Dough Email Js Template Id For Order Cancel: template_rf9qcz8
+
+Dash Dough Email Js Template Id For Order Placed: template_4xyaqxx
