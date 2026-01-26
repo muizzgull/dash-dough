@@ -11,7 +11,7 @@ const PIZZAS = [
     { id: 10, name: "Double Dough Dynamite Ranch", category: "Double Dough", prices: { standard: 2100 }, img: "dynamite-ranch.png", desc: "Pizza with Chicken and Cheese." },
     { id: 11, name: "10 Pcs Buzz Bites", category: "Others", prices: { Standard: 500 }, img: "buzz-bites.png", desc: "Golden chicken, dip it in the sauce." },
     { id: 12, name: "Small Chocolate Pizza", category: "Others", prices: { Standard: 500 }, img: "chocolate-pizza.png", desc: "Mini Pizza with Chocolate over it." },
-    { id: 13, name: "Baked Drummet", category: "Others", prices: { "6 Pieces": 370, "10 Pieces": 1000 }, img: "baked-drummet.png", desc: "Oven-baked chicken drummets." }
+    { id: 13, name: "Baked Drummet", category: "Others", prices: { "6 Pieces": 370, "15 Pieces": 1000 }, img: "baked-drummet.png", desc: "Oven-baked chicken drummets." }
 ];
 
 let cart = JSON.parse(localStorage.getItem('dash_cart')) || [];
@@ -368,7 +368,7 @@ function attachListeners() {
     if (form) {
         form.onsubmit = (e) => {
             e.preventDefault();
-            if (!isStoreOpen()) { showNotification("CLOSED: OPEN 5PM - 2:45AM"); return; }
+            if (!isStoreOpen()) { showNotification("CLOSED. <br> OPEN 5PM - 2:45AM"); return; }
             const emailValue = document.getElementById('cust-email').value;
             if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(emailValue)) { showNotification("Error: Must be @gmail.com"); return; }
             const btn = document.getElementById('order-btn');
