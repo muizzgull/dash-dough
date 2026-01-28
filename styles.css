@@ -61,3 +61,7 @@ body { font-family: 'Inter', sans-serif; background-color: #F3F2D4; }
     border-radius: 12px; font-weight: 900; font-size: 12px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.1);
 }
+
+.bottle-bg {
+    background-color: #C22112;
+}

@@ -11,7 +11,9 @@ const PIZZAS = [
     { id: 10, name: "Double Dough Dynamite Ranch", category: "Double Dough", prices: { standard: 2100 }, img: "dynamite-ranch.png", desc: "Pizza with Chicken and Cheese." },
     { id: 11, name: "10 Pcs Buzz Bites", category: "Others", prices: { Standard: 500 }, img: "buzz-bites.png", desc: "Golden chicken, dip it in the sauce." },
     { id: 12, name: "Small Chocolate Pizza", category: "Others", prices: { Standard: 500 }, img: "chocolate-pizza.png", desc: "Mini Pizza with Chocolate over it." },
-    { id: 13, name: "Baked Drummet", category: "Others", prices: { "6 Pieces": 370, "15 Pieces": 1000 }, img: "baked-drummet.png", desc: "Oven-baked chicken drummets." }
+    { id: 13, name: "Baked Drummet", category: "Others", prices: { "6 Pieces": 370, "15 Pieces": 1000 }, img: "baked-drummet.png", desc: "Oven-baked chicken drummets." },
+    // DRINKS SECTION ADDED BELOW
+    { id: 14, name: "Cola Next", category: "Drinks", prices: { "NR": 80, "1 Litre": 170, "1.5 Litre": 220 }, img: "cold-drink-red.png", desc: "" },
 ];
 
 let cart = JSON.parse(localStorage.getItem('dash_cart')) || [];
@@ -116,16 +118,17 @@ function renderFooter() {
 
 function HomeView() {
     let html = `<header class="mb-10 px-0"><div class="w-full mt-10 h-[180px] rounded-2xl md:h-[300px] flex items-center justify-center bg-[#D89000]"><img src="hero-img.jpeg" alt="Banner" class="max-w-full max-h-full object-contain"></div></header>`;
-    ["Classic", "Premium", "Double Dough", "Others"].forEach(cat => {
+    // Added "Drinks" to the category loop
+    ["Classic", "Premium", "Double Dough", "Others", "Drinks"].forEach(cat => {
         html += `<section class="mb-20 px-2 md:px-4"><h2 class="text-2xl md:text-3xl font-bold mb-10 border-b-2 border-[#154BD1] inline-block pb-2 uppercase ml-2">${cat}</h2><div class="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-10">`;
         PIZZAS.filter(p => p.category === cat).forEach(pizza => {
             const minPrice = Math.min(...Object.values(pizza.prices));
-            const showFrom = (cat === "Classic" || cat === "Premium" || pizza.name === "Baked Drummet");
+            const showFrom = (cat === "Classic" || cat === "Premium" || pizza.name === "Baked Drummet" || cat === "Drinks");
             
             html += `<div class="pizza-card bg-yellow-400 rounded-2xl overflow-hidden shadow-2xl border-2 border-white hover:border-[#154BD1] transition flex flex-col">
                 <div class="p-3 md:p-5">
                     <div class="rounded-2xl flex items-center justify-center bg-yellow-400 img-container">
-                        <img src="${pizza.img}" class="w-full h-32 md:h-56 object-contain png-fix" loading="lazy">
+                        <img src="${pizza.img}" class="w-full  h-32 md:h-56 object-contain png-fix" loading="lazy">
                     </div>
                 </div>
                 <div class="p-4 md:p-8 pt-0 flex-grow flex flex-col justify-between">
@@ -375,7 +378,6 @@ function attachListeners() {
             btn.innerText = "PLACING ORDER..."; btn.disabled = true;
             
             setTimeout(() => {
-                // NEW UNIQUE ID LOGIC: "DASH-" + Timestamp + Random String
                 const orderId = "DASH-" + Date.now().toString().slice(-6) + Math.random().toString(36).substring(2, 5).toUpperCase();
                 
                 const subtotal = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
