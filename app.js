@@ -12,7 +12,6 @@ const PIZZAS = [
     { id: 11, name: "10 Pcs Buzz Bites", category: "Others", prices: { Standard: 500 }, img: "buzz-bites.png", desc: "Golden chicken, dip it in the sauce." },
     { id: 12, name: "Small Chocolate Pizza", category: "Others", prices: { Standard: 500 }, img: "chocolate-pizza.png", desc: "Mini Pizza with Chocolate over it." },
     { id: 13, name: "Baked Drummet", category: "Others", prices: { "6 Pieces": 370, "15 Pieces": 1000 }, img: "baked-drummet.png", desc: "Oven-baked chicken drummets." },
-    // DRINKS SECTION ADDED BELOW
     { id: 14, name: "Cola Next", category: "Drinks", prices: { "NR": 80, "1 Litre": 170, "1.5 Litre": 220 }, img: "cold-drink-red.png", desc: "" },
 ];
 
@@ -118,7 +117,6 @@ function renderFooter() {
 
 function HomeView() {
     let html = `<header class="mb-10 px-0"><div class="w-full mt-10 h-[180px] rounded-2xl md:h-[300px] flex items-center justify-center bg-[#D89000]"><img src="hero-img.jpeg" alt="Banner" class="max-w-full max-h-full object-contain"></div></header>`;
-    // Added "Drinks" to the category loop
     ["Classic", "Premium", "Double Dough", "Others", "Drinks"].forEach(cat => {
         html += `<section class="mb-20 px-2 md:px-4"><h2 class="text-2xl md:text-3xl font-bold mb-10 border-b-2 border-[#154BD1] inline-block pb-2 uppercase ml-2">${cat}</h2><div class="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-10">`;
         PIZZAS.filter(p => p.category === cat).forEach(pizza => {
@@ -242,15 +240,16 @@ function renderOrdersList() {
             return `<div class="text-[11px] font-bold opacity-80 uppercase">${item.qty}x ${pizza ? pizza.name : 'Pizza'} (${item.size})</div>`;
         }).join("");
 
+        // Added logic to handle blank date/time for old orders
+        const dateTimeDisplay = (order.date && order.time) ? `${order.date} | ${order.time}` : "";
+
         return `<div class="bg-white p-6 rounded-3xl mb-6 shadow-md border-l-8 border-[#154BD1]">
             <div class="flex justify-between items-start">
                 <div>
                     <p class="text-[10px] opacity-40 font-black uppercase">ID: ${order.id}</p>
+                    <p class="text-[10px] font-black text-[#154BD1] uppercase mb-1">${dateTimeDisplay}</p>
                     <div class="my-2 border-y border-gray-100 py-2">${orderItemsHtml}</div>
                     <p class="text-xl font-black">Rs. ${order.total}</p>
-                </div>
-                <div class="text-right">
-                    ${timeLeft > 0 ? `<p class="text-xs text-red-500 font-black uppercase animate-pulse">${min}:${sec < 10 ? '0' : ''}${sec}</p><button onclick="askCancelOrder('${order.id}')" class="bg-red-500 text-white px-4 py-1 rounded-lg text-[10px] font-black uppercase mt-1">Cancel</button>` : `<span class="bg-green-100 text-green-600 px-4 py-2 rounded-xl font-black uppercase text-xs">Confirmed</span>`}
                 </div>
             </div>
         </div>`;
@@ -309,30 +308,6 @@ window.removeItem = (id, size) => {
     saveState(); router(false);
 };
 
-window.askCancelOrder = (orderId) => {
-    const modal = document.createElement('div'); 
-    modal.id = 'modal-overlay';
-    modal.className = "fixed inset-0 z-[1000] flex items-center justify-center bg-transparent pointer-events-auto";
-    modal.innerHTML = `
-    <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl animate-pop text-center border-4 border-red-500">
-        <h2 class="text-2xl font-black mb-4 uppercase text-red-500">Cancel Order?</h2>
-        <button onclick="processCancellation('${orderId}')" id="confirm-cancel-btn" class="w-full bg-red-500 text-white py-4 rounded-xl font-black uppercase mb-3">Yes, Cancel</button>
-        <button onclick="closeModal()" class="w-full text-xs font-black opacity-30 uppercase">No</button>
-    </div>`;
-    document.body.appendChild(modal);
-};
-
-window.processCancellation = (orderId) => {
-    const btn = document.getElementById('confirm-cancel-btn');
-    btn.innerText = "CANCELLING..."; btn.disabled = true;
-    setTimeout(() => {
-        const order = orders.find(o => o.id === orderId);
-        emailjs.send('service_g7du1xb', 'template_rf9qcz8', { order_id: order.id, customer_name: order.customer.name, total_price: order.total });
-        orders = orders.filter(o => o.id !== orderId);
-        saveState(); router(false); closeModal(); showNotification("Order Cancelled!");
-    }, 1500);
-};
-
 function showNotification(msg) {
     const existing = document.querySelectorAll('.notification-box');
     existing.forEach(el => el.remove());
@@ -371,35 +346,72 @@ function attachListeners() {
     if (form) {
         form.onsubmit = (e) => {
             e.preventDefault();
-            if (!isStoreOpen()) { showNotification("CLOSED. <br> OPEN 5PM - 2:45AM"); return; }
-            const emailValue = document.getElementById('cust-email').value;
-            if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(emailValue)) { showNotification("Error: Must be @gmail.com"); return; }
-            const btn = document.getElementById('order-btn');
-            btn.innerText = "PLACING ORDER..."; btn.disabled = true;
-            
-            setTimeout(() => {
-                const orderId = "DASH-" + Date.now().toString().slice(-6) + Math.random().toString(36).substring(2, 5).toUpperCase();
-                
-                const subtotal = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
-                const total = Math.round(subtotal - (subtotal * appliedDiscount));
-                const itemDetails = cart.map(i => `${i.qty}x ${PIZZAS.find(p=>p.id===i.id).name} (${i.size})`).join('\n');
-                
-                const promoStatusText = appliedDiscount > 0 ? "PROMO APPLIED: 10% DISCOUNT (WELCOME10%)" : "NO PROMO CODE USED";
 
-                emailjs.send('service_g7du1xb', 'template_4xyaqxx', { 
-                    order_id: orderId, 
-                    customer_name: document.getElementById('cust-name').value, 
-                    customer_phone: document.getElementById('cust-phone').value, 
-                    customer_email: emailValue, 
-                    delivery_address: document.getElementById('cust-address').value, 
-                    item_details: itemDetails, 
-                    total_price: total,
-                    promo_status: promoStatusText 
-                });
+            // CUSTOM BEAUTIFUL CONFIRMATION MODAL
+            const modal = document.createElement('div');
+            modal.id = 'modal-overlay';
+            modal.className = "fixed inset-0 z-[1000] flex items-center justify-center bg-black/40 pointer-events-auto backdrop-blur-sm";
+            modal.innerHTML = `
+                <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl animate-pop text-center border-4 border-[#154BD1]">
+                    <h2 class="text-2xl font-black mb-4 uppercase text-[#154BD1]">Ready to Order?</h2>
+                    <p class="text-sm font-bold opacity-60 mb-8 uppercase">Please confirm you want to place this order now.</p>
+                    <button id="confirm-final-order" class="w-full bg-[#154BD1] text-white py-4 rounded-xl font-black uppercase mb-3 text-lg">Yes, Place Order</button>
+                    <button onclick="closeModal()" class="w-full py-2 text-xs font-black opacity-30 uppercase tracking-widest">No, Wait</button>
+                </div>`;
+            document.body.appendChild(modal);
 
-                orders.unshift({ id: orderId, items: [...cart], total: total, timestamp: Date.now(), customer: { name: document.getElementById('cust-name').value, phone: document.getElementById('cust-phone').value, email: emailValue, address: document.getElementById('cust-address').value } });
-                unreadOrdersCount++; cart = []; appliedDiscount = 0; saveState(); router(true); showOrderTimerPopup();
-            }, 2000);
+            document.getElementById('confirm-final-order').onclick = () => {
+                closeModal();
+                processOrder();
+            };
         };
     }
+}
+
+function processOrder() {
+    if (!isStoreOpen()) { showNotification("CLOSED. <br> OPEN 5PM - 2:45AM"); return; }
+    const emailValue = document.getElementById('cust-email').value;
+    if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(emailValue)) { showNotification("Error: Must be @gmail.com"); return; }
+    
+    const btn = document.getElementById('order-btn');
+    btn.innerText = "PLACING ORDER..."; btn.disabled = true;
+    
+    setTimeout(() => {
+        const orderId = "DASH-" + Date.now().toString().slice(-6) + Math.random().toString(36).substring(2, 5).toUpperCase();
+        
+        // Capture Date and Time
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
+        const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+        const subtotal = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+        const total = Math.round(subtotal - (subtotal * appliedDiscount));
+        const itemDetails = cart.map(i => `${i.qty}x ${PIZZAS.find(p=>p.id===i.id).name} (${i.size})`).join('\n');
+        
+        const promoStatusText = appliedDiscount > 0 ? "PROMO APPLIED: 10% DISCOUNT (WELCOME10%)" : "NO PROMO CODE USED";
+
+        emailjs.send('service_g7du1xb', 'template_4xyaqxx', { 
+            order_id: orderId, 
+            customer_name: document.getElementById('cust-name').value, 
+            customer_phone: document.getElementById('cust-phone').value, 
+            customer_email: emailValue, 
+            delivery_address: document.getElementById('cust-address').value, 
+            item_details: itemDetails, 
+            total_price: total,
+            promo_status: promoStatusText,
+            order_time: `${dateStr} ${timeStr}`
+        });
+
+        orders.unshift({ 
+            id: orderId, 
+            items: [...cart], 
+            total: total, 
+            timestamp: Date.now(), 
+            date: dateStr, 
+            time: timeStr,
+            customer: { name: document.getElementById('cust-name').value, phone: document.getElementById('cust-phone').value, email: emailValue, address: document.getElementById('cust-address').value } 
+        });
+        
+        unreadOrdersCount++; cart = []; appliedDiscount = 0; saveState(); router(true); showOrderTimerPopup();
+    }, 2000);
 }
