@@ -50,7 +50,12 @@ function isStoreOpen() {
 function renderFloatingCart() {
     const barContainer = document.getElementById('floating-cart-bar');
     if (!barContainer) return;
-    if (cart.length === 0 || window.location.hash === "#/cart") { barContainer.innerHTML = ""; return; }
+    
+    // Only hide if we are actually on the Cart page
+    if (window.location.hash === "#/cart") { 
+        barContainer.innerHTML = ""; 
+        return; 
+    }
 
     const totalQty = cart.reduce((acc, item) => acc + item.qty, 0);
     const totalPrice = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
@@ -163,7 +168,7 @@ function CartView() {
     let discountAmount = subtotal * appliedDiscount;
     let finalTotal = subtotal - discountAmount;
 
-    return `<div class="max-w-4xl mx-auto px-2"><h2 class="text-3xl font-black uppercase mb-10">Your Cart</h2><div id="cart-items-container">
+    return `<div class="max-w-4xl mt-6 mx-auto px-2"><h2 class="text-3xl font-black uppercase mb-10">Your Cart</h2><div id="cart-items-container">
         ${cart.map(item => {
             const pizza = PIZZAS.find(p => p.id === item.id);
             return `<div class="flex items-center justify-between bg-white p-4 rounded-2xl mb-4 shadow-sm">
@@ -226,7 +231,7 @@ window.applyPromo = () => {
 
 function OrdersView() {
     if (orders.length === 0) return `<div class="text-center py-20 uppercase font-black opacity-20"><h2>No History</h2></div>`;
-    return `<div class="max-w-3xl mx-auto px-4"><h2 class="text-3xl font-black mb-10 uppercase">Order History</h2>${renderOrdersList()}</div>`;
+    return `<div class="max-w-3xl mt-6 mx-auto px-4"><h2 class="text-3xl font-black mb-10 uppercase">Order History</h2>${renderOrdersList()}</div>`;
 }
 
 function renderOrdersList() {
@@ -240,7 +245,6 @@ function renderOrdersList() {
             return `<div class="text-[11px] font-bold opacity-80 uppercase">${item.qty}x ${pizza ? pizza.name : 'Pizza'} (${item.size})</div>`;
         }).join("");
 
-        // Added logic to handle blank date/time for old orders
         const dateTimeDisplay = (order.date && order.time) ? `${order.date} | ${order.time}` : "";
 
         return `<div class="bg-white p-6 rounded-3xl mb-6 shadow-md border-l-8 border-[#154BD1]">
@@ -280,7 +284,7 @@ function openSizeModal(pizza) {
     }).join('');
 
     modal.innerHTML = `
-    <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl animate-pop text-center border-4 border-[#154BD1]">
+    <div class="bg-white p-8 rounded-[2.5rem] w-full max-sm shadow-2xl animate-pop text-center border-4 border-[#154BD1]">
         <h2 class="text-2xl font-black mb-1 uppercase text-[#154BD1]">${pizza.name}</h2>
         <p class="text-xs font-bold opacity-60 mb-6">Quantity: ${menuQty}</p>
         ${buttons}
@@ -346,8 +350,6 @@ function attachListeners() {
     if (form) {
         form.onsubmit = (e) => {
             e.preventDefault();
-
-            // CUSTOM BEAUTIFUL CONFIRMATION MODAL
             const modal = document.createElement('div');
             modal.id = 'modal-overlay';
             modal.className = "fixed inset-0 z-[1000] flex items-center justify-center bg-black/40 pointer-events-auto backdrop-blur-sm";
@@ -378,8 +380,6 @@ function processOrder() {
     
     setTimeout(() => {
         const orderId = "DASH-" + Date.now().toString().slice(-6) + Math.random().toString(36).substring(2, 5).toUpperCase();
-        
-        // Capture Date and Time
         const now = new Date();
         const dateStr = now.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
         const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
