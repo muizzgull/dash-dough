@@ -13,6 +13,12 @@ const PIZZAS = [
     { id: 12, name: "Small Chocolate Pizza", category: "Others", prices: { Standard: 500 }, img: "chocolate-pizza.png", desc: "Mini Pizza with Chocolate over it." },
     { id: 13, name: "Baked Drummet", category: "Others", prices: { "6 Pieces": 370, "15 Pieces": 1000 }, img: "baked-drummet.png", desc: "Oven-baked chicken drummets." },
     { id: 14, name: "Cola Next", category: "Drinks", prices: { "NR": 80, "1 Litre": 170, "1.5 Litre": 220 }, img: "cold-drink-red.png", desc: "" },
+    // New Sauces Section
+    { id: 15, name: "Smokey Sauce", category: "Sauces", prices: { Standard: 80 }, img: "smokey-sauce.PNG", desc: "" },
+    { id: 16, name: "Dynamite Sauce", category: "Sauces", prices: { Standard: 80 }, img: "dynamite-sauce.PNG", desc: "" },
+    // New Fries Section
+    { id: 17, name: "Masala Fries", category: "Fries", prices: { Standard: 250 }, img: "plain-fries.png", desc: "This image is not of our restaurant." },
+    { id: 18, name: "Plain Fries", category: "Fries", prices: { Standard: 200 }, img: "plain-fries.png", desc: "This image is not of our restaurant." }
 ];
 
 let cart = JSON.parse(localStorage.getItem('dash_cart')) || [];
@@ -81,6 +87,11 @@ const router = (withAnimation = true) => {
         document.getElementById("app").innerHTML = `<main class="min-h-screen pb-32">${match.view()}</main>${renderFooter()}`;
         saveState();
         attachListeners();
+        
+        if (location.hash === "#/orders" && sessionStorage.getItem('order_success_flag')) {
+            sessionStorage.removeItem('order_success_flag');
+            showOrderSuccessModal();
+        }
     };
 
     if (withAnimation && wave) {
@@ -118,16 +129,21 @@ function renderFooter() {
 }
 
 function HomeView() {
-    let html = `<header class="mb-10 px-0"><div class="w-full mt-10 h-[180px] rounded-2xl md:h-[300px] flex items-center justify-center bg-[#D89000]"><img src="hero-img.jpeg" alt="Banner" class="max-w-full max-h-full object-contain"></div></header>`;
-    ["Classic", "Premium", "Double Dough", "Others", "Drinks"].forEach(cat => {
+    let html = `
+    <header class="mb-10 px-0"><div class="w-full mt-10 h-[180px] rounded-2xl md:h-[300px] flex items-center justify-center bg-[#D89000]"><img src="hero-img.jpeg" alt="Banner" class="max-w-full max-h-full object-contain"></div></header>`;
+    
+    ["Classic", "Premium", "Double Dough", "Fries", "Others", "Sauces", "Drinks"].forEach(cat => {
         html += `<section class="mb-20 px-2 md:px-4"><h2 class="text-2xl md:text-3xl font-bold mb-10 border-b-2 border-[#154BD1] inline-block pb-2 uppercase ml-2">${cat}</h2><div class="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-10">`;
         PIZZAS.filter(p => p.category === cat).forEach(pizza => {
             const minPrice = Math.min(...Object.values(pizza.prices));
             const hasMultipleSizes = Object.keys(pizza.prices).length > 1;
             
+            // Custom border radius for fries images
+            const imgRadiusClass = pizza.category === "Fries" ? "rounded-[6px]" : "rounded-2xl";
+
             html += `<div class="pizza-card bg-yellow-400 rounded-2xl overflow-hidden shadow-2xl border-2 border-white hover:border-[#154BD1] transition flex flex-col">
                 <div class="p-3 md:p-5">
-                    <div class="rounded-2xl flex items-center justify-center bg-yellow-400 img-container">
+                    <div class="${imgRadiusClass} flex items-center justify-center bg-yellow-400 img-container overflow-hidden">
                         <img src="${pizza.img}" class="w-full h-32 md:h-56 object-contain png-fix" loading="lazy">
                     </div>
                 </div>
@@ -158,6 +174,14 @@ window.updateMenuQty = (id, delta) => {
     if(el) el.innerText = Math.max(1, parseInt(el.innerText) + delta);
 };
 
+window.updateInstruction = (id, size, text) => {
+    const item = cart.find(i => i.id === id && i.size === size);
+    if (item) {
+        item.instruction = text;
+        localStorage.setItem('dash_cart', JSON.stringify(cart));
+    }
+};
+
 function CartView() {
     if (cart.length === 0) return `<div class="text-center py-20 uppercase font-black opacity-20"><h2>Cart Empty</h2></div>`;
     
@@ -168,9 +192,27 @@ function CartView() {
     return `<div class="max-w-4xl mt-6 mx-auto px-2"><h2 class="text-3xl font-black uppercase mb-10">Your Cart</h2><div id="cart-items-container">
         ${cart.map(item => {
             const pizza = PIZZAS.find(p => p.id === item.id);
-            return `<div class="flex items-center justify-between bg-white p-4 rounded-2xl mb-4 shadow-sm">
-                <div class="flex items-center gap-4"><img src="${pizza.img}" class="w-16 h-16 object-contain png-fix"><div><h4 class="text-xs md:text-xl font-black uppercase">${pizza.name} [${item.size}]</h4><p class="font-bold opacity-60">Rs. ${item.price}</p></div></div>
-                <div class="flex items-center gap-4"><button onclick="changeQty(${item.id}, '${item.size}', -1)" class="font-black px-2">-</button><span class="font-black">${item.qty}</span><button onclick="changeQty(${item.id}, '${item.size}', 1)" class="font-black px-2">+</button><button onclick="removeItem(${item.id}, '${item.size}')" class="text-red-500 font-bold ml-4">✕</button></div>
+            return `<div class="bg-white p-4 rounded-2xl mb-4 shadow-sm flex flex-col">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <img src="${pizza.img}" class="w-16 h-16 object-contain png-fix">
+                        <div>
+                            <h4 class="text-xs md:text-xl font-black uppercase">${pizza.name} [${item.size}]</h4>
+                            <p class="font-bold opacity-60">Rs. ${item.price}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <button onclick="changeQty(${item.id}, '${item.size}', -1)" class="font-black px-2">-</button>
+                        <span class="font-black">${item.qty}</span>
+                        <button onclick="changeQty(${item.id}, '${item.size}', 1)" class="font-black px-2">+</button>
+                        <button onclick="removeItem(${item.id}, '${item.size}')" class="text-red-500 font-bold ml-4">✕</button>
+                    </div>
+                </div>
+                <input type="text" 
+                    placeholder="Special instructions (e.g. No olives, extra spicy...)" 
+                    oninput="updateInstruction(${item.id}, '${item.size}', this.value)" 
+                    value="${item.instruction || ''}" 
+                    class="mt-3 w-full p-2 text-xs border-b border-gray-100 focus:outline-none focus:border-[#154BD1] font-bold uppercase opacity-70">
             </div>`;
         }).join("")}
         </div>
@@ -223,7 +265,8 @@ function renderOrdersList() {
     return orders.map(order => {
         const orderItemsHtml = order.items.map(item => {
             const pizza = PIZZAS.find(p => p.id === item.id);
-            return `<div class="text-[11px] font-bold opacity-80 uppercase">${item.qty}x ${pizza ? pizza.name : 'Pizza'} (${item.size})</div>`;
+            const instructionDisplay = item.instruction ? `<div class="text-[9px] lowercase opacity-60 italic">- ${item.instruction}</div>` : "";
+            return `<div class="text-[11px] font-bold opacity-80 uppercase">${item.qty}x ${pizza ? pizza.name : 'Pizza'} (${item.size}) ${instructionDisplay}</div>`;
         }).join("");
         return `<div class="bg-white p-6 rounded-3xl mb-6 shadow-md border-l-8 border-[#154BD1]">
             <p class="text-[10px] opacity-40 font-black uppercase">ID: ${order.id}</p>
@@ -263,7 +306,11 @@ function openSizeModal(pizza) {
 
 window.confirmAddToCart = (id, size, price, qty = 1) => {
     const item = cart.find(i => i.id === id && i.size === size);
-    if (item) item.qty += qty; else cart.push({ id, size, price, qty });
+    if (item) {
+        item.qty += qty;
+    } else {
+        cart.push({ id, size, price, qty, instruction: "" });
+    }
     saveState(); closeModal(); showNotification("Added to Cart!");
 };
 
@@ -290,17 +337,19 @@ function showNotification(msg) {
     setTimeout(() => { el.classList.add('opacity-0', 'transition-opacity', 'duration-500'); setTimeout(() => el.remove(), 500); }, 2000);
 }
 
-function showOrderTimerPopup() {
-    let timeLeft = 5;
-    const timerEl = document.createElement('div');
-    timerEl.className = "fixed inset-0 m-auto flex flex-col items-center justify-center w-fit h-fit bg-[#154BD1] text-[#F3F2D4] px-10 py-5 rounded-3xl shadow-2xl z-[100] font-black uppercase animate-pop text-center min-w-[300px]";
-    const updateHTML = () => { timerEl.innerHTML = `<div>ORDER PLACED!</div> <div class="text-3xl mt-1">${timeLeft}s</div>`; };
-    updateHTML(); document.body.appendChild(timerEl);
-    const itv = setInterval(() => {
-        timeLeft--;
-        if (timeLeft <= 0) { clearInterval(itv); timerEl.remove(); location.hash = "#/orders"; }
-        else updateHTML();
-    }, 1000);
+function showOrderSuccessModal() {
+    const modal = document.createElement('div');
+    modal.id = 'modal-overlay';
+    modal.className = "fixed inset-0 z-[1000] flex items-center justify-center bg-black/40 pointer-events-auto backdrop-blur-sm";
+    modal.innerHTML = `<div class="bg-white p-10 rounded-[3rem] w-full max-w-sm shadow-2xl animate-pop text-center border-4 border-[#154BD1]">
+        <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+        </div>
+        <h2 class="text-3xl font-black mb-2 uppercase text-[#154BD1]">Order Placed!</h2>
+        <p class="text-sm font-bold opacity-60 mb-8 uppercase tracking-tight">Your request has been sent successfully.</p>
+        <button onclick="closeModal()" class="w-full bg-[#154BD1] text-white py-4 rounded-2xl font-black uppercase text-lg shadow-lg">Great!</button>
+    </div>`;
+    document.body.appendChild(modal);
 }
 
 function attachListeners() {
@@ -335,7 +384,12 @@ async function processOrder() {
     
     const subtotal = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
     const total = Math.round(subtotal - (subtotal * appliedDiscount));
-    const itemDetails = cart.map(i => `${i.qty}x ${PIZZAS.find(p=>p.id===i.id).name} (${i.size})`).join('\n');
+
+    const itemDetails = cart.map(i => {
+        let line = `${i.qty}x ${PIZZAS.find(p=>p.id===i.id).name} (${i.size})`;
+        if (i.instruction) line += `\n   [INSTR: ${i.instruction}]`;
+        return line;
+    }).join('\n\n');
 
     const templateParams = {
         order_id: orderId,
@@ -350,7 +404,6 @@ async function processOrder() {
     };
 
     try {
-        // CRITICAL: We await the email send before proceeding
         await emailjs.send('service_g7du1xb', 'template_4xyaqxx', templateParams);
         
         orders.unshift({ id: orderId, items: [...cart], total, timestamp: Date.now(), date: dateStr, time: timeStr });
@@ -358,8 +411,9 @@ async function processOrder() {
         cart = []; 
         appliedDiscount = 0; 
         saveState(); 
-        router(true); 
-        showOrderTimerPopup();
+        
+        sessionStorage.setItem('order_success_flag', 'true');
+        location.hash = "#/orders"; 
     } catch (error) {
         console.error("Order Failed:", error);
         showNotification("ORDER FAILED. CHECK CONNECTION.");
