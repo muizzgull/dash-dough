@@ -366,6 +366,31 @@ async function processOrder() {
 
 // --- NEW AUTH VIEWS ---
 
+const login = async (event) => {
+    event.preventDefault();
+
+    const email = document.getElementById('email').value.toLowerCase();
+    const password = document.getElementById('password').value;
+
+    const res = await fetch('https://dash-dough-backend.vercel.app/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+        credentials: 'include'
+
+    })
+
+    const data = await res.json()
+
+    if (!data.success) {
+        alert(data.message || "Login failed. Please try again.");
+        return false;
+    }
+
+    alert("Login successful!");
+
+}
+
 function LoginView() {
 
     
@@ -376,14 +401,14 @@ function LoginView() {
             <h2 class="text-3xl font-black uppercase text-[#154BD1] mb-2 text-center">Welcome Back</h2>
             <p class="text-[10px] font-black opacity-40 mb-8 uppercase text-center tracking-widest">Login to your account</p>
             
-            <form onsubmit="event.preventDefault(); showNotification('Login feature coming soon!')" class="space-y-4">
+            <form onsubmit="login(event)" class="space-y-4">
                 <div>
                     <label class="block text-[10px] font-black uppercase mb-1 ml-2 opacity-60">Email Address</label>
-                    <input type="email" placeholder="dash@dough.com" required class="w-full p-4 rounded-2xl bg-[#F3F2D4]/30 border-2 border-[#154BD1]/10 focus:border-[#154BD1] outline-none font-bold text-[#154BD1]">
+                    <input type="email" placeholder="dash@dough.com" required class="w-full p-4 rounded-2xl bg-[#F3F2D4]/30 border-2 border-[#154BD1]/10 focus:border-[#154BD1] outline-none font-bold text-[#154BD1]" id="email">
                 </div>
                 <div>
                     <label class="block text-[10px] font-black uppercase mb-1 ml-2 opacity-60">Password</label>
-                    <input type="password" placeholder="••••••••" required class="w-full p-4 rounded-2xl bg-[#F3F2D4]/30 border-2 border-[#154BD1]/10 focus:border-[#154BD1] outline-none font-bold text-[#154BD1]">
+                    <input type="password" placeholder="••••••••" required class="w-full p-4 rounded-2xl bg-[#F3F2D4]/30 border-2 border-[#154BD1]/10 focus:border-[#154BD1] outline-none font-bold text-[#154BD1]" id="password">
                 </div>
                 <button type="submit" class="w-full bg-[#154BD1] text-white py-4 rounded-2xl font-black uppercase text-lg shadow-lg hover:scale-[1.02] transition-transform">Sign In</button>
             </form>
@@ -405,6 +430,11 @@ const signup = async (event) => {
     const password = document.getElementById('password').value;
     const confirmPassword = document.getElementById('confirm-password').value;
 
+    if(password !== confirmPassword) {
+        alert("Passwords do not match.");
+        return false;
+    }
+
     const res = await fetch('https://dash-dough-backend.vercel.app/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -413,8 +443,10 @@ const signup = async (event) => {
 
     })
 
-    if (!res.success) {
-        alert(res.message || "Signup failed. Please try again.");
+    const data = await res.json()
+
+    if (!data.success) {
+        alert(data.message || "Signup failed. Please try again.");
         return false;
     }
 
