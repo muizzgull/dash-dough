@@ -81,8 +81,8 @@ const router = (withAnimation = true) => {
         { path: "#/", view: HomeView }, 
         { path: "#/cart", view: CartView }, 
         { path: "#/orders", view: OrdersView },
-        { path: "#/login", view: LoginView },
-        { path: "#/signup", view: SignupView }
+        // { path: "#/login", view: LoginView },
+        // { path: "#/signup", view: SignupView }
     ];
     const match = routes.find(r => r.path === (location.hash || "#/")) || routes[0];
 
@@ -366,133 +366,133 @@ async function processOrder() {
 
 // --- NEW AUTH VIEWS ---
 
-const login = async (event) => {
-    event.preventDefault();
+// const login = async (event) => {
+//     event.preventDefault();
 
-    const email = document.getElementById('email').value.toLowerCase();
-    const password = document.getElementById('password').value;
+//     const email = document.getElementById('email').value.toLowerCase();
+//     const password = document.getElementById('password').value;
 
-    const res = await fetch('https://dash-dough-backend.vercel.app/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include'
+//     const res = await fetch('https://dash-dough-backend.vercel.app/api/auth/login', {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify({ email, password }),
+//         credentials: 'include'
 
-    })
+//     })
 
-    const data = await res.json()
+//     const data = await res.json()
 
-    if (!data.success) {
-        alert(data.message || "Login failed. Please try again.");
-        return false;
-    }
+//     if (!data.success) {
+//         alert(data.message || "Login failed. Please try again.");
+//         return false;
+//     }
 
-    alert("Login successful!");
+//     alert("Login successful!");
 
-}
+// }
 
-function LoginView() {
-
-    
-
-    return `
-    <div class="max-w-md mx-auto mt-10 px-4">
-        <div class="bg-white p-8 rounded-[2.5rem] border-4 border-[#154BD1] shadow-2xl">
-            <h2 class="text-3xl font-black uppercase text-[#154BD1] mb-2 text-center">Welcome Back</h2>
-            <p class="text-[10px] font-black opacity-40 mb-8 uppercase text-center tracking-widest">Login to your account</p>
-            
-            <form onsubmit="login(event)" class="space-y-4">
-                <div>
-                    <label class="block text-[10px] font-black uppercase mb-1 ml-2 opacity-60">Email Address</label>
-                    <input type="email" placeholder="dash@dough.com" required class="w-full p-4 rounded-2xl bg-[#F3F2D4]/30 border-2 border-[#154BD1]/10 focus:border-[#154BD1] outline-none font-bold text-[#154BD1]" id="email">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black uppercase mb-1 ml-2 opacity-60">Password</label>
-                    <input type="password" placeholder="••••••••" required class="w-full p-4 rounded-2xl bg-[#F3F2D4]/30 border-2 border-[#154BD1]/10 focus:border-[#154BD1] outline-none font-bold text-[#154BD1]" id="password">
-                </div>
-                <button type="submit" class="w-full bg-[#154BD1] text-white py-4 rounded-2xl font-black uppercase text-lg shadow-lg hover:scale-[1.02] transition-transform">Sign In</button>
-            </form>
-            
-            <div class="mt-8 text-center border-t border-gray-100 pt-6">
-                <p class="text-[10px] font-black opacity-40 uppercase mb-2">Don't have an account?</p>
-                <a href="#/signup" class="text-sm font-black uppercase text-[#154BD1] hover:underline">Create Account</a>
-            </div>
-        </div>
-    </div>`;
-}
-
-const signup = async (event) => {
-    event.preventDefault();
-
-    const name = document.getElementById('fullname').value;
-    const phone = document.getElementById('phone').value;
-    const email = document.getElementById('email').value.toLowerCase();
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirm-password').value;
-
-    if(password !== confirmPassword) {
-        alert("Passwords do not match.");
-        return false;
-    }
-
-    const res = await fetch('https://dash-dough-backend.vercel.app/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phone, email, password, confirmPassword }),
-        credentials: 'include'
-
-    })
-
-    const data = await res.json()
-
-    if (!data.success) {
-        alert(data.message || "Signup failed. Please try again.");
-        return false;
-    }
-
-    alert("Signup successful! Please log in.");
-
-
-
-}
-
-function SignupView() {
+// function LoginView() {
 
     
-    return `
-    <div class="max-w-md mx-auto mt-10 px-4">
-        <div class="bg-white p-8 rounded-[2.5rem] border-4 border-[#154BD1] shadow-2xl">
-            <h2 class="text-3xl font-black uppercase text-[#154BD1] mb-2 text-center">Join the Club</h2>
-            <p class="text-[10px] font-black opacity-40 mb-8 uppercase text-center tracking-widest">Create a new account</p>
+
+//     return `
+//     <div class="max-w-md mx-auto mt-10 px-4">
+//         <div class="bg-white p-8 rounded-[2.5rem] border-4 border-[#154BD1] shadow-2xl">
+//             <h2 class="text-3xl font-black uppercase text-[#154BD1] mb-2 text-center">Welcome Back</h2>
+//             <p class="text-[10px] font-black opacity-40 mb-8 uppercase text-center tracking-widest">Login to your account</p>
             
-            <form onsubmit="signup(event)" class="space-y-4">
-                <div>
-                    <label class="block text-[10px] font-black uppercase mb-1 ml-2 opacity-60">Full Name</label>
-                    <input type="text" placeholder="John Doe" required class="w-full p-4 rounded-2xl bg-[#F3F2D4]/30 border-2 border-[#154BD1]/10 focus:border-[#154BD1] outline-none font-bold text-[#154BD1]" id="fullname">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black uppercase mb-1 ml-2 opacity-60">Phone</label>
-                    <input type="tel" placeholder="03XXXXXXXXX" required class="w-full p-4 rounded-2xl bg-[#F3F2D4]/30 border-2 border-[#154BD1]/10 focus:border-[#154BD1] outline-none font-bold text-[#154BD1]" id="phone">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black uppercase mb-1 ml-2 opacity-60">Email</label>
-                    <input type="email" placeholder="dash@dough.com" required class="w-full p-4 rounded-2xl bg-[#F3F2D4]/30 border-2 border-[#154BD1]/10 focus:border-[#154BD1] outline-none font-bold text-[#154BD1]" id="email">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black uppercase mb-1 ml-2 opacity-60">Password</label>
-                    <input type="password" placeholder="••••••••" required class="w-full p-4 rounded-2xl bg-[#F3F2D4]/30 border-2 border-[#154BD1]/10 focus:border-[#154BD1] outline-none font-bold text-[#154BD1]" id="password">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-black uppercase mb-1 ml-2 opacity-60">Confirm Password</label>
-                    <input type="password" placeholder="••••••••" required class="w-full p-4 rounded-2xl bg-[#F3F2D4]/30 border-2 border-[#154BD1]/10 focus:border-[#154BD1] outline-none font-bold text-[#154BD1]" id="confirm-password">
-                </div>
-                <button type="submit" class="w-full bg-[#154BD1] text-white py-4 rounded-2xl font-black uppercase text-lg shadow-lg hover:scale-[1.02] transition-transform" >Register</button>
-            </form>
+//             <form onsubmit="login(event)" class="space-y-4">
+//                 <div>
+//                     <label class="block text-[10px] font-black uppercase mb-1 ml-2 opacity-60">Email Address</label>
+//                     <input type="email" placeholder="dash@dough.com" required class="w-full p-4 rounded-2xl bg-[#F3F2D4]/30 border-2 border-[#154BD1]/10 focus:border-[#154BD1] outline-none font-bold text-[#154BD1]" id="email">
+//                 </div>
+//                 <div>
+//                     <label class="block text-[10px] font-black uppercase mb-1 ml-2 opacity-60">Password</label>
+//                     <input type="password" placeholder="••••••••" required class="w-full p-4 rounded-2xl bg-[#F3F2D4]/30 border-2 border-[#154BD1]/10 focus:border-[#154BD1] outline-none font-bold text-[#154BD1]" id="password">
+//                 </div>
+//                 <button type="submit" class="w-full bg-[#154BD1] text-white py-4 rounded-2xl font-black uppercase text-lg shadow-lg hover:scale-[1.02] transition-transform">Sign In</button>
+//             </form>
             
-            <div class="mt-8 text-center border-t border-gray-100 pt-6">
-                <p class="text-[10px] font-black opacity-40 uppercase mb-2">Already a member?</p>
-                <a href="#/login" class="text-sm font-black uppercase text-[#154BD1] hover:underline">Log In Instead</a>
-            </div>
-        </div>
-    </div>`;
-}
+//             <div class="mt-8 text-center border-t border-gray-100 pt-6">
+//                 <p class="text-[10px] font-black opacity-40 uppercase mb-2">Don't have an account?</p>
+//                 <a href="#/signup" class="text-sm font-black uppercase text-[#154BD1] hover:underline">Create Account</a>
+//             </div>
+//         </div>
+//     </div>`;
+// }
+
+// const signup = async (event) => {
+//     event.preventDefault();
+
+//     const name = document.getElementById('fullname').value;
+//     const phone = document.getElementById('phone').value;
+//     const email = document.getElementById('email').value.toLowerCase();
+//     const password = document.getElementById('password').value;
+//     const confirmPassword = document.getElementById('confirm-password').value;
+
+//     if(password !== confirmPassword) {
+//         alert("Passwords do not match.");
+//         return false;
+//     }
+
+//     const res = await fetch('https://dash-dough-backend.vercel.app/api/auth/signup', {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify({ name, phone, email, password, confirmPassword }),
+//         credentials: 'include'
+
+//     })
+
+//     const data = await res.json()
+
+//     if (!data.success) {
+//         alert(data.message || "Signup failed. Please try again.");
+//         return false;
+//     }
+
+//     alert("Signup successful! Please log in.");
+
+
+
+// }
+
+// function SignupView() {
+
+    
+//     return `
+//     <div class="max-w-md mx-auto mt-10 px-4">
+//         <div class="bg-white p-8 rounded-[2.5rem] border-4 border-[#154BD1] shadow-2xl">
+//             <h2 class="text-3xl font-black uppercase text-[#154BD1] mb-2 text-center">Join the Club</h2>
+//             <p class="text-[10px] font-black opacity-40 mb-8 uppercase text-center tracking-widest">Create a new account</p>
+            
+//             <form onsubmit="signup(event)" class="space-y-4">
+//                 <div>
+//                     <label class="block text-[10px] font-black uppercase mb-1 ml-2 opacity-60">Full Name</label>
+//                     <input type="text" placeholder="John Doe" required class="w-full p-4 rounded-2xl bg-[#F3F2D4]/30 border-2 border-[#154BD1]/10 focus:border-[#154BD1] outline-none font-bold text-[#154BD1]" id="fullname">
+//                 </div>
+//                 <div>
+//                     <label class="block text-[10px] font-black uppercase mb-1 ml-2 opacity-60">Phone</label>
+//                     <input type="tel" placeholder="03XXXXXXXXX" required class="w-full p-4 rounded-2xl bg-[#F3F2D4]/30 border-2 border-[#154BD1]/10 focus:border-[#154BD1] outline-none font-bold text-[#154BD1]" id="phone">
+//                 </div>
+//                 <div>
+//                     <label class="block text-[10px] font-black uppercase mb-1 ml-2 opacity-60">Email</label>
+//                     <input type="email" placeholder="dash@dough.com" required class="w-full p-4 rounded-2xl bg-[#F3F2D4]/30 border-2 border-[#154BD1]/10 focus:border-[#154BD1] outline-none font-bold text-[#154BD1]" id="email">
+//                 </div>
+//                 <div>
+//                     <label class="block text-[10px] font-black uppercase mb-1 ml-2 opacity-60">Password</label>
+//                     <input type="password" placeholder="••••••••" required class="w-full p-4 rounded-2xl bg-[#F3F2D4]/30 border-2 border-[#154BD1]/10 focus:border-[#154BD1] outline-none font-bold text-[#154BD1]" id="password">
+//                 </div>
+//                 <div>
+//                     <label class="block text-[10px] font-black uppercase mb-1 ml-2 opacity-60">Confirm Password</label>
+//                     <input type="password" placeholder="••••••••" required class="w-full p-4 rounded-2xl bg-[#F3F2D4]/30 border-2 border-[#154BD1]/10 focus:border-[#154BD1] outline-none font-bold text-[#154BD1]" id="confirm-password">
+//                 </div>
+//                 <button type="submit" class="w-full bg-[#154BD1] text-white py-4 rounded-2xl font-black uppercase text-lg shadow-lg hover:scale-[1.02] transition-transform" >Register</button>
+//             </form>
+            
+//             <div class="mt-8 text-center border-t border-gray-100 pt-6">
+//                 <p class="text-[10px] font-black opacity-40 uppercase mb-2">Already a member?</p>
+//                 <a href="#/login" class="text-sm font-black uppercase text-[#154BD1] hover:underline">Log In Instead</a>
+//             </div>
+//         </div>
+//     </div>`;
+// }
