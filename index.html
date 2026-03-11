@@ -19,24 +19,38 @@
         <img src="dash-dough-logo.png" id="wave-logo" class="w-48 md:w-64 opacity-0" alt="Logo">
     </div>
 
-    <nav class="fixed top-0 w-full bg-[#154BD1] text-[#F3F2D4] py-3 px-3 md:px-8 flex justify-between items-center z-50 shadow-lg">
-        <a href="#/"><img class="w-32 md:w-40" src="dash-dough-logo.png" alt="Logo"></a>
-        <div class="flex items-center gap-3 md:gap-8">
-            <a href="#/" class="font-bold uppercase text-[10px] md:text-sm">Menu</a>
-            <a href="#/orders" class="relative font-bold uppercase text-[10px] md:text-sm">
-                Orders
-                <span id="order-count" class="hidden absolute -top-2 -right-3 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center">0</span>
-            </a>
-            <!-- <a href="#/login" class="font-bold uppercase text-[10px] md:text-sm px-3 py-1 border-2 border-[#F3F2D4] rounded-xl hover:bg-[#F3F2D4] hover:text-[#154BD1] transition-colors">Sign In</a> -->
+    <div class="fixed top-0 w-full z-50">
+        <nav class="w-full bg-[#154BD1] text-[#F3F2D4] py-3 px-3 md:px-8 flex justify-between items-center shadow-lg">
+            <a href="#/"><img class="w-24 md:w-40" src="dash-dough-logo.png" alt="Logo"></a>
             
-            <a href="#/cart" class="relative p-2 bg-[#F3F2D4] text-[#154BD1] rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center">0</span>
-            </a>
-        </div>
-    </nav>
+            <div class="flex items-center gap-2 md:gap-6">
+                <a class="flex items-center gap-1 font-bold uppercase text-[10px] md:text-sm hover:opacity-80 cursor-pointer transition-opacity bg-white/10 px-2 py-1 rounded-lg">
+                    <span class="text-[11px] md:text-sm">0370-3302022</span>
+                </a>
 
-    <div id="app" class="mt-20 md:mt-24 p-2 md:p-8 min-h-screen"></div>
+                <a href="#/" class="font-bold uppercase text-[10px] md:text-sm">Menu</a>
+                
+                <a href="#/orders" class="relative font-bold uppercase text-[10px] md:text-sm">
+                    Orders
+                    <span id="order-count" class="hidden absolute -top-2 -right-3 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-normal">0</span>
+                </a>
+                
+                <a href="#/cart" class="relative p-2 bg-[#F3F2D4] text-[#154BD1] rounded-full flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <span id="cart-count" class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-normal">0</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <div class="mt-[56px] md:mt-[72px] w-full bg-[#f3f2d4] border-b border-[#154BD1]/20 py-3 flex justify-center items-center gap-2 text-[#154BD1] font-bold text-[11px] md:text-[14px] uppercase tracking-wider">
+        <span class="mt-6 text-xl">Open: 5:00 PM - 2:45 AM</span>
+    </div>
+
+    <div id="app" class="p-2 md:p-8 min-h-screen"></div>
+    
     <div id="floating-cart-bar" class="fixed bottom-6 left-0 w-full flex justify-center pointer-events-none z-[100]"></div>
 
     <script src="app.js"></script>
