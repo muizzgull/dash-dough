@@ -186,7 +186,7 @@ function renderFAQ() {
         { q: "Which flavors are spicy?", a: "Our **American Heat** & **Dynamite Ranch** are both spicy." },
         { q: "Which Pizza has mild flavor?", a: "The **Mughlai Pizza** has a mild flavor." },
         { q: "What is your most selling Pizza?", a: "The **Dynamite Ranch** is our most selling selling pizza." },
-        { q: "Pizza Sizes & Servings?", a: "• **Regular:** 10x8 inches (6 slices) - Servings **2 persons**.<br>• **Party:** 10x15 inches (8 slices) - Servings **3-4 persons**.<br>• **Double Dough:** 10x15 inches - Extra heavy, servings **4-5 persons**." },
+        { q: "Pizza Sizes & Servings?", a: "• **Regular:** 10x8 inches (6 slices) - Servings **2 persons**.<br>• **Party:** 10x15 inches (8 slices) - Servings **3-4 persons**.<br>• **Double Dough:** 10x15 inches - Servings **4-5 persons**." },
         { q: "Delivery Time & Charges?", a: "Standard delivery takes about **35 to 45 minutes**. Charges depend on distance, with a minimum charge of **Rs. 80**." }
     ];
 
@@ -238,14 +238,20 @@ window.toggleSaveDetails = () => {
     } else {
         dot.classList.remove('hidden');
         localStorage.setItem('dash_save_enabled', 'true');
-        // Save immediately when they turn it on
-        saveCustomerInfo();
+        
+        // If they have already typed something, save it now
+        const name = document.getElementById('cust-name').value;
+        if(name) {
+            saveCustomerInfo();
+        }
     }
 };
 
 function saveCustomerInfo() {
-    // Only save if the user has enabled the toggle
-    if (localStorage.getItem('dash_save_enabled') === 'true') {
+    const dot = document.getElementById('save-check-dot');
+    
+    // Check if the dot exists and is NOT hidden
+    if (dot && !dot.classList.contains('hidden')) {
         const info = {
             name: document.getElementById('cust-name').value,
             phone: document.getElementById('cust-phone').value,
@@ -253,6 +259,7 @@ function saveCustomerInfo() {
             address: document.getElementById('cust-address').value
         };
         localStorage.setItem('dash_customer_info', JSON.stringify(info));
+        console.log("Details updated in storage!");
     }
 }
 
@@ -275,61 +282,109 @@ window.updateInstruction = (id, size, text) => {
 function CartView() {
     if (cart.length === 0) return `<div class="text-center py-20 uppercase font-black opacity-20"><h2>Cart Empty</h2></div>`;
     
-    // 1. Pull saved info from localStorage if it exists
+    // 1. Pull saved info from localStorage for auto-filling
     const savedInfo = JSON.parse(localStorage.getItem('dash_customer_info')) || {};
-    const isSaveEnabled = localStorage.getItem('dash_save_enabled') === 'true';
+    const hasSavedDetails = Object.keys(savedInfo).length > 0;
+    
+    // The toggle always starts as 'false' (empty) on page load/refresh
+    const isSaveEnabled = false; 
 
     let subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
     let discountAmount = subtotal * appliedDiscount;
     let finalTotal = subtotal - discountAmount;
 
     return `<div class="max-w-4xl mt-6 mx-auto px-2">
-        <h2 class="text-3xl font-black uppercase mb-10">Your Cart</h2>
+        <h2 class="text-3xl font-black uppercase mb-10 ml-2">Your Cart</h2>
+        
         <div id="cart-items-container">
             ${cart.map(item => {
                 const pizza = PIZZAS.find(p => p.id === item.id);
-                return `<div class="bg-white p-4 rounded-2xl mb-4 shadow-sm flex flex-col">
+                return `<div class="bg-white p-4 rounded-2xl mb-4 shadow-sm flex flex-col border border-gray-100">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-4">
                             <img src="${pizza.img}" class="w-16 h-16 object-contain png-fix">
                             <div>
                                 <h4 class="text-xs md:text-xl font-black uppercase">${pizza.name} [${item.size}]</h4>
-                                <p class="font-bold opacity-60">Rs. ${item.price}</p>
+                                <p class="font-bold opacity-60 text-sm">Rs. ${item.price}</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-4">
-                            <button onclick="changeQty(${item.id}, '${item.size}', -1)" class="font-black px-2">-</button>
-                            <span class="font-black">${item.qty}</span>
-                            <button onclick="changeQty(${item.id}, '${item.size}', 1)" class="font-black px-2">+</button>
-                            <button onclick="removeItem(${item.id}, '${item.size}')" class="text-red-500 font-bold ml-4">✕</button>
+                            <div class="flex items-center bg-gray-50 rounded-lg px-2">
+                                <button onclick="changeQty(${item.id}, '${item.size}', -1)" class="font-black px-3 py-1 text-[#154BD1]">-</button>
+                                <span class="font-black w-6 text-center text-sm">${item.qty}</span>
+                                <button onclick="changeQty(${item.id}, '${item.size}', 1)" class="font-black px-3 py-1 text-[#154BD1]">+</button>
+                            </div>
+                            <button onclick="removeItem(${item.id}, '${item.size}')" class="text-red-500 font-bold ml-2">✕</button>
                         </div>
                     </div>
-                    <input type="text" placeholder="Special instructions..." oninput="updateInstruction(${item.id}, '${item.size}', this.value)" value="${item.instruction || ''}" class="mt-3 w-full p-2 text-xs border-b border-gray-100 focus:outline-none focus:border-[#154BD1] font-bold uppercase opacity-70">
+                    <input type="text" placeholder="Special instructions (e.g., no onions)..." 
+                        oninput="updateInstruction(${item.id}, '${item.size}', this.value)" 
+                        value="${item.instruction || ''}" 
+                        class="mt-3 w-full p-2 text-[10px] border-b border-gray-100 focus:outline-none focus:border-[#154BD1] font-bold uppercase opacity-70">
                 </div>`;
             }).join("")}
         </div>
 
-        <div class="bg-white p-6 rounded-3xl mt-6 shadow-sm flex flex-col md:flex-row gap-4 items-center">
-            <input type="text" id="promo-input" placeholder="Promo Code" class="w-full p-4 rounded-xl border-2 border-[#154BD1]/10 font-bold uppercase">
-            <button onclick="applyPromo()" class="w-full md:w-40 bg-[#154BD1] text-white py-4 rounded-xl font-black uppercase">Apply</button>
+        <div class="bg-white p-6 rounded-3xl mt-6 shadow-sm flex flex-col md:flex-row gap-4 items-center border border-gray-100">
+            <input type="text" id="promo-input" placeholder="Promo Code" class="w-full p-4 rounded-xl border-2 border-[#154BD1]/10 font-bold uppercase focus:border-[#154BD1] outline-none">
+            <button onclick="applyPromo()" class="w-full md:w-40 bg-[#154BD1] text-white py-4 rounded-xl font-black uppercase transition active:scale-95">Apply</button>
         </div>
 
-        <div class="bg-[#154BD1] text-[#F3F2D4] p-8 rounded-[2rem] mt-6">
-            <h3 class="text-2xl font-black mb-6 uppercase">Total: Rs. ${finalTotal.toFixed(0)}</h3>
-            <form id="order-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input type="text" id="cust-name" placeholder="Full Name" required value="${savedInfo.name || ''}" class="p-4 rounded-xl text-[#154BD1] font-bold">
-                <input type="text" id="cust-phone" placeholder="Phone" required value="${savedInfo.phone || ''}" class="p-4 rounded-xl text-[#154BD1] font-bold">
-                <input type="email" id="cust-email" placeholder="Email" required value="${savedInfo.email || ''}" class="p-4 rounded-xl text-[#154BD1] font-bold md:col-span-2">
-                <input type="text" id="cust-address" placeholder="Address" required value="${savedInfo.address || ''}" class="p-4 rounded-xl text-[#154BD1] font-bold md:col-span-2">
+        <div class="bg-[#154BD1] text-[#F3F2D4] p-8 rounded-[2rem] mt-6 shadow-2xl">
+            
+            <div class="mb-8 space-y-3 border-b border-white/10 pb-6">
+                <div class="flex justify-between items-center opacity-70">
+                    <span class="font-bold uppercase text-[10px] tracking-widest">Subtotal</span>
+                    <span class="font-black">Rs. ${subtotal}</span>
+                </div>
                 
-                <div class="md:col-span-2 flex items-center gap-3 mt-2 cursor-pointer group" onclick="toggleSaveDetails()">
-                    <div id="save-check-circle" class="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center transition-all group-active:scale-90">
-                        <div id="save-check-dot" class="w-3 h-3 bg-white rounded-full ${isSaveEnabled ? '' : 'hidden'}"></div>
+                ${appliedDiscount > 0 ? `
+                <div class="flex justify-between items-center text-yellow-400">
+                    <span class="font-bold uppercase text-[10px] tracking-widest">Promo Discount (10%)</span>
+                    <span class="font-black">- Rs. ${discountAmount.toFixed(0)}</span>
+                </div>` : ''}
+
+                <div class="flex justify-between items-center pt-2">
+                    <span class="font-black uppercase text-xl tracking-tighter">Total To Pay</span>
+                    <span class="font-black text-3xl">Rs. ${finalTotal.toFixed(0)}</span>
+                </div>
+            </div>
+
+            ${hasSavedDetails ? `
+            <div class="bg-white/10 border border-white/10 rounded-2xl p-4 mb-8 flex items-center gap-3">
+                <div class="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                <span class="text-[10px] font-black uppercase tracking-wider leading-relaxed">
+                    Welcome back! Your Details are Saved.
+                </span>
+            </div>` : ''}
+
+            <form id="order-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="text" id="cust-name" placeholder="Full Name" required 
+                    value="${savedInfo.name || ''}" class="p-4 rounded-xl text-[#154BD1] font-bold outline-none border-2 border-transparent focus:border-yellow-400">
+                
+                <input type="text" id="cust-phone" placeholder="Phone Number" required 
+                    value="${savedInfo.phone || ''}" class="p-4 rounded-xl text-[#154BD1] font-bold outline-none border-2 border-transparent focus:border-yellow-400">
+                
+                <input type="email" id="cust-email" placeholder="Email Address" required 
+                    value="${savedInfo.email || ''}" class="p-4 rounded-xl text-[#154BD1] font-bold md:col-span-2 outline-none border-2 border-transparent focus:border-yellow-400">
+                
+                <input type="text" id="cust-address" placeholder="Delivery Address" required 
+                    value="${savedInfo.address || ''}" class="p-4 rounded-xl text-[#154BD1] font-bold md:col-span-2 outline-none border-2 border-transparent focus:border-yellow-400">
+                
+                <div class="md:col-span-2 mt-2">
+                    <div class="inline-flex items-center gap-3 cursor-pointer group w-fit" onclick="toggleSaveDetails()">
+                        <div id="save-check-circle" class="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center transition-all group-hover:bg-white/10 group-active:scale-90">
+                            <div id="save-check-dot" class="w-3 h-3 bg-white rounded-full hidden"></div>
+                        </div>
+                        <span class="text-[10px] font-black uppercase tracking-widest opacity-80 select-none">
+                            ${hasSavedDetails ? 'Update my saved details' : 'Save my details for next time'}
+                        </span>
                     </div>
-                    <span class="text-[10px] font-black uppercase tracking-widest opacity-80">Save my details for next time</span>
                 </div>
 
-                <button type="submit" id="order-btn" class="md:col-span-2 bg-[#F3F2D4] text-[#154BD1] py-5 rounded-xl font-black uppercase text-xl mt-4">Order Now</button>
+                <button type="submit" id="order-btn" class="md:col-span-2 bg-[#F3F2D4] text-[#154BD1] py-5 rounded-xl font-black uppercase text-xl mt-6 shadow-lg transition transform hover:-translate-y-1 active:translate-y-0">
+                    Order Now
+                </button>
             </form>
         </div>
     </div>`;
@@ -372,15 +427,30 @@ function openSizeModal(pizza) {
     const menuQty = parseInt(document.getElementById(`menu-qty-${pizza.id}`).innerText);
     const modal = document.createElement('div'); 
     modal.id = 'modal-overlay';
-    modal.className = "fixed inset-0 z-[1000] flex items-center justify-center bg-black/20 pointer-events-auto backdrop-blur-sm";
+    modal.className = "fixed inset-0 z-[1000] flex items-center justify-center bg-black/20 pointer-events-auto backdrop-blur-sm px-4";
+    
     let buttons = Object.entries(pizza.prices).map(([size, price]) => {
-        return `<button onclick="confirmAddToCart(${pizza.id}, '${size}', ${price}, ${menuQty})" class="w-full p-4 rounded-2xl border-2 border-[#154BD1] text-[#154BD1] font-black mb-2 hover:bg-[#154BD1] hover:text-[#F3F2D4] transition uppercase bg-white">${size} - Rs. ${price}</button>`;
+        // Determine serving text based on size name
+        let servingText = "";
+        if (size.toLowerCase() === "regular") servingText = "1-2 PERSONS SERVING";
+        else if (size.toLowerCase() === "party") servingText = "3-4 PERSONS SERVING";
+        else if (pizza.category === "Double Dough") servingText = "4-5 PERSONS SERVING";
+
+        return `
+        <button onclick="confirmAddToCart(${pizza.id}, '${size}', ${price}, ${menuQty})" 
+            class="w-full p-4 rounded-2xl border-2 border-[#154BD1] text-[#154BD1] font-black mb-3 hover:bg-[#154BD1] hover:text-[#F3F2D4] transition uppercase bg-white flex flex-col items-center justify-center">
+            <span class="text-lg">${size} - RS. ${price}</span>
+            ${servingText ? `<span class="text-[9px] opacity-60 mt-1">${servingText}</span>` : ''}
+        </button>`;
     }).join('');
-    modal.innerHTML = `<div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl animate-pop text-center border-4 border-[#154BD1]">
+
+    modal.innerHTML = `
+    <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-sm shadow-2xl animate-pop text-center border-4 border-[#154BD1]">
         <h2 class="text-2xl font-black mb-6 uppercase text-[#154BD1]">${pizza.name}</h2>
         ${buttons}
-        <button onclick="closeModal()" class="mt-4 w-full text-[10px] font-black opacity-30 uppercase">Close</button>
+        <button onclick="closeModal()" class="mt-2 w-full text-[10px] font-black opacity-30 uppercase tracking-widest">Close</button>
     </div>`;
+    
     document.body.appendChild(modal);
 }
 
