@@ -81,6 +81,7 @@ const router = (withAnimation = true) => {
         { path: "#/", view: HomeView }, 
         { path: "#/cart", view: CartView }, 
         { path: "#/orders", view: OrdersView },
+        { path: "#/add-review", view: AddReviewView }
         // { path: "#/login", view: LoginView },
         // { path: "#/signup", view: SignupView }
     ];
@@ -496,3 +497,105 @@ async function processOrder() {
 //         </div>
 //     </div>`;
 // }
+
+
+function setRating(starCount) {
+    
+
+    if(starCount > 5) return;
+    
+
+    if(starCount === 5) {
+        document.querySelectorAll('#star-rating .star-btn').forEach(btn => btn.classList.add('text-yellow-400'));
+    } else {
+        for(let i = 1; i <= starCount; i++) {
+            document.getElementById(`star-${i}`).classList.add('text-yellow-400');
+            
+            for(let j = starCount + 1; j <= 5; j++) {
+                document.getElementById(`star-${j}`).classList.remove('text-yellow-400');
+            }   
+        }
+    }
+}
+
+async function submitReview(event) {
+    event.preventDefault();
+    const name = document.getElementById('name').value;
+    const email = document.getElementById('email').value;
+
+    const starBtns = document.querySelectorAll('#star-rating .star-btn');
+    const rating = Array.from(starBtns).filter(btn => btn.classList.contains('text-yellow-400')).length;
+
+    const reviewText = document.getElementById('review-text').value;
+
+    const res = await fetch('https://dash-dough-backend.vercel.app/api/review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userName:name, email, rating, review: reviewText }),
+        credentials: 'include'
+    })
+
+    const data = await res.json();
+
+    if (!data.success) {
+        alert(data.message || "Failed to submit review. Please try again.");
+        return false;
+    }
+
+    else{
+        alert("Thank you for your feedback!");
+        document.getElementById('review-form').reset();
+        setRating(1);
+    }
+    
+}
+
+
+function AddReviewView() {
+    return `<div class="max-w-4xl mx-auto p-4 md:p-8 font-sans">
+    <div class="mb-8">
+        <h2 class="text-4xl font-black uppercase text-[#154BD1]">Rate Your Experience</h2>
+        <p class="font-bold opacity-60">WE VALUE YOUR FEEDBACK AS MUCH AS YOUR CRUST.</p>
+    </div>
+
+    <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100">
+        <form id="review-form" onsubmit="submitReview(event)">
+            
+            <div class="mb-8">
+                <label class="block text-xs font-black uppercase mb-2 opacity-50">Your Name</label>
+                <input type="text" required id="name" class="w-full p-4 rounded-xl border-2 border-[#154BD1]/10 font-bold uppercase focus:outline-none focus:border-[#154BD1]">
+                    
+            </div>
+
+             <div class="mb-8">
+                <label class="block text-xs font-black uppercase mb-2 opacity-50">Email (optional)</label>
+                <input type="text" id="email" class="w-full p-4 rounded-xl border-2 border-[#154BD1]/10 font-bold uppercase focus:outline-none focus:border-[#154BD1]">
+                    
+            </div>
+
+            <div class="mb-8">
+                <label class="block text-xs font-black uppercase mb-2 opacity-50">The Rating</label>
+                <div class="flex gap-2" id="star-rating">
+                    <button type="button" id="star-1" value="1" onclick="setRating(1)" class="star-btn text-3xl text-gray-200 text-yellow-400">★</button>
+                    <button type="button" id="star-2" value="2" onclick="setRating(2)" class="star-btn text-3xl text-gray-200">★</button>
+                    <button type="button" id="star-3" value="3" onclick="setRating(3)" class="star-btn text-3xl text-gray-200">★</button>
+                    <button type="button" id="star-4" value="4" onclick="setRating(4)" class="star-btn text-3xl text-gray-200">★</button>
+                    <button type="button" id="star-5" value="5" onclick="setRating(5)" class="star-btn text-3xl text-gray-200">★</button>
+                </div>
+                <input type="hidden" id="rating-value" value="0" required>
+            </div>
+
+            <div class="mb-8">
+                <label class="block text-xs font-black uppercase mb-2 opacity-50">Your Thoughts</label>
+                <textarea id="review-text" rows="4" placeholder="HOW WAS THE CHEESE? THE CRUNCH? THE VIBE?" 
+                    class="w-full p-4 rounded-xl border-2 border-[#154BD1]/10 font-bold uppercase focus:outline-none focus:border-[#154BD1]"></textarea>
+            </div>
+
+           
+            <button type="submit" class="w-full bg-[#154BD1] text-[#F3F2D4] py-5 rounded-2xl font-black uppercase text-xl shadow-lg hover:opacity-90 transition-all">
+                Post Review
+            </button>
+        </form>
+    </div>
+</div>`;
+}
