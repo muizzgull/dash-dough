@@ -135,7 +135,11 @@ function renderFooter() {
 
 function HomeView() {
     let html = `
-    <header class="mb-10 px-0"><div class="w-full mt-10 h-[180px] rounded-2xl md:h-[300px] flex items-center justify-center bg-[#D89000]"><img src="hero-img.jpeg" alt="Banner" class="max-w-full max-h-full object-contain"></div></header>`;
+    <header class="mb-10 px-0">
+        <div class="w-full mt-10 h-[180px] rounded-2xl md:h-[300px] flex items-center justify-center bg-[#D89000]">
+            <img src="hero-img.jpeg" alt="Banner" class="max-w-full max-h-full object-contain">
+        </div>
+    </header>`;
     
     ["Classic", "Premium", "Double Dough", "Fries", "Others", "Sauces", "Drinks"].forEach(cat => {
         html += `<section class="mb-20 px-2 md:px-4"><h2 class="text-2xl md:text-3xl font-bold mb-10 border-b-2 border-[#154BD1] inline-block pb-2 uppercase ml-2">${cat}</h2><div class="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-10">`;
@@ -169,8 +173,60 @@ function HomeView() {
         });
         html += `</div></section>`;
     });
+
+    // ADDED THE FAQ SECTION HERE
+    html += renderFAQ();
+
     return html;
 }
+
+
+function renderFAQ() {
+    const faqs = [
+        { q: "Which flavors are spicy?", a: "Our **American Heat** & **Dynamite Ranch** are both spicy." },
+        { q: "Which Pizza has mild flavor?", a: "The **Mughlai Pizza** has a mild flavor." },
+        { q: "What is your most selling Pizza?", a: "The **Dynamite Ranch** is our most selling selling pizza." },
+        { q: "Pizza Sizes & Servings?", a: "• **Regular:** 10x8 inches (6 slices) - Servings **2 persons**.<br>• **Party:** 10x15 inches (8 slices) - Servings **3-4 persons**.<br>• **Double Dough:** 10x15 inches - Extra heavy, servings **4-5 persons**." },
+        { q: "Delivery Time & Charges?", a: "Standard delivery takes about **35 to 45 minutes**. Charges depend on distance, with a minimum charge of **Rs. 80**." }
+    ];
+
+    let faqHtml = `
+    <section class="max-w-4xl mx-auto px-4 mt-20 mb-10">
+        <h2 class="text-3xl font-black uppercase text-[#154BD1] mb-8 text-center underline decoration-yellow-400">Questions</h2>
+        <div class="space-y-4">`;
+
+    faqs.forEach((item, index) => {
+        faqHtml += `
+        <div class="border-2 border-[#154BD1] rounded-2xl overflow-hidden bg-white shadow-sm">
+            <button onclick="toggleFaq(${index})" class="w-full p-5 text-left flex justify-between items-center bg-white hover:bg-[#F3F2D4]/30 transition-colors">
+                <span class="font-black uppercase text-[#154BD1] text-sm md:text-base">${item.q}</span>
+                <span id="faq-icon-${index}" class="text-[#154BD1] font-black transition-transform duration-300">+</span>
+            </button>
+            <div id="faq-ans-${index}" class="hidden p-5 pt-0 text-sm md:text-base font-bold text-gray-600 border-t border-[#154BD1]/10">
+                ${item.a}
+            </div>
+        </div>`;
+    });
+
+    faqHtml += `</div></section>`;
+    return faqHtml;
+}
+
+// Global function to handle clicking
+window.toggleFaq = (index) => {
+    const ans = document.getElementById(`faq-ans-${index}`);
+    const icon = document.getElementById(`faq-icon-${index}`);
+    
+    if (ans.classList.contains('hidden')) {
+        ans.classList.remove('hidden');
+        icon.style.transform = "rotate(45deg)";
+        icon.innerText = "×";
+    } else {
+        ans.classList.add('hidden');
+        icon.style.transform = "rotate(0deg)";
+        icon.innerText = "+";
+    }
+};
 
 // ... Existing functions: updateMenuQty, updateInstruction, CartView, applyPromo, OrdersView, renderOrdersList, addToCart, openSizeModal, confirmAddToCart, closeModal, changeQty, removeItem, showNotification, showOrderSuccessModal, attachListeners, processOrder ...
 // Note: Keeping all logic exactly as you provided.
@@ -556,7 +612,7 @@ function AddReviewView() {
     return `<div class="max-w-4xl mx-auto p-4 md:p-8 font-sans">
     <div class="mb-8">
         <h2 class="text-4xl font-black uppercase text-[#154BD1]">Rate Your Experience</h2>
-        <p class="font-bold opacity-60">WE VALUE YOUR FEEDBACK AS MUCH AS YOUR CRUST.</p>
+        <p class="font-bold opacity-60">YOUR REVIEW WILL GET SHOWN TO OTHER PEOPLE.</p>
     </div>
 
     <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100">
@@ -588,7 +644,7 @@ function AddReviewView() {
 
             <div class="mb-8">
                 <label class="block text-xs font-black uppercase mb-2 opacity-50">Your Thoughts</label>
-                <textarea id="review-text" rows="4" placeholder="HOW WAS THE CHEESE? THE CRUNCH? THE VIBE?" 
+                <textarea id="review-text" rows="4" placeholder="HOW WAS THE CHEESE? THE FLAVOR? THE VIBE?" 
                     class="w-full p-4 rounded-xl border-2 border-[#154BD1]/10 font-bold uppercase focus:outline-none focus:border-[#154BD1]"></textarea>
             </div>
 
