@@ -539,6 +539,7 @@ async function submitReview(event) {
 
     if (!data.success) {
         alert(data.message || "Failed to submit review. Please try again.");
+        console.log(data);
         return false;
     }
 
