@@ -228,6 +228,34 @@ window.toggleFaq = (index) => {
     }
 };
 
+window.toggleSaveDetails = () => {
+    const dot = document.getElementById('save-check-dot');
+    const isCurrentlyEnabled = !dot.classList.contains('hidden');
+    
+    if (isCurrentlyEnabled) {
+        dot.classList.add('hidden');
+        localStorage.setItem('dash_save_enabled', 'false');
+    } else {
+        dot.classList.remove('hidden');
+        localStorage.setItem('dash_save_enabled', 'true');
+        // Save immediately when they turn it on
+        saveCustomerInfo();
+    }
+};
+
+function saveCustomerInfo() {
+    // Only save if the user has enabled the toggle
+    if (localStorage.getItem('dash_save_enabled') === 'true') {
+        const info = {
+            name: document.getElementById('cust-name').value,
+            phone: document.getElementById('cust-phone').value,
+            email: document.getElementById('cust-email').value,
+            address: document.getElementById('cust-address').value
+        };
+        localStorage.setItem('dash_customer_info', JSON.stringify(info));
+    }
+}
+
 // ... Existing functions: updateMenuQty, updateInstruction, CartView, applyPromo, OrdersView, renderOrdersList, addToCart, openSizeModal, confirmAddToCart, closeModal, changeQty, removeItem, showNotification, showOrderSuccessModal, attachListeners, processOrder ...
 // Note: Keeping all logic exactly as you provided.
 
@@ -246,44 +274,61 @@ window.updateInstruction = (id, size, text) => {
 
 function CartView() {
     if (cart.length === 0) return `<div class="text-center py-20 uppercase font-black opacity-20"><h2>Cart Empty</h2></div>`;
+    
+    // 1. Pull saved info from localStorage if it exists
+    const savedInfo = JSON.parse(localStorage.getItem('dash_customer_info')) || {};
+    const isSaveEnabled = localStorage.getItem('dash_save_enabled') === 'true';
+
     let subtotal = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
     let discountAmount = subtotal * appliedDiscount;
     let finalTotal = subtotal - discountAmount;
 
-    return `<div class="max-w-4xl mt-6 mx-auto px-2"><h2 class="text-3xl font-black uppercase mb-10">Your Cart</h2><div id="cart-items-container">
-        ${cart.map(item => {
-            const pizza = PIZZAS.find(p => p.id === item.id);
-            return `<div class="bg-white p-4 rounded-2xl mb-4 shadow-sm flex flex-col">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <img src="${pizza.img}" class="w-16 h-16 object-contain png-fix">
-                        <div>
-                            <h4 class="text-xs md:text-xl font-black uppercase">${pizza.name} [${item.size}]</h4>
-                            <p class="font-bold opacity-60">Rs. ${item.price}</p>
+    return `<div class="max-w-4xl mt-6 mx-auto px-2">
+        <h2 class="text-3xl font-black uppercase mb-10">Your Cart</h2>
+        <div id="cart-items-container">
+            ${cart.map(item => {
+                const pizza = PIZZAS.find(p => p.id === item.id);
+                return `<div class="bg-white p-4 rounded-2xl mb-4 shadow-sm flex flex-col">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <img src="${pizza.img}" class="w-16 h-16 object-contain png-fix">
+                            <div>
+                                <h4 class="text-xs md:text-xl font-black uppercase">${pizza.name} [${item.size}]</h4>
+                                <p class="font-bold opacity-60">Rs. ${item.price}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <button onclick="changeQty(${item.id}, '${item.size}', -1)" class="font-black px-2">-</button>
+                            <span class="font-black">${item.qty}</span>
+                            <button onclick="changeQty(${item.id}, '${item.size}', 1)" class="font-black px-2">+</button>
+                            <button onclick="removeItem(${item.id}, '${item.size}')" class="text-red-500 font-bold ml-4">✕</button>
                         </div>
                     </div>
-                    <div class="flex items-center gap-4">
-                        <button onclick="changeQty(${item.id}, '${item.size}', -1)" class="font-black px-2">-</button>
-                        <span class="font-black">${item.qty}</span>
-                        <button onclick="changeQty(${item.id}, '${item.size}', 1)" class="font-black px-2">+</button>
-                        <button onclick="removeItem(${item.id}, '${item.size}')" class="text-red-500 font-bold ml-4">✕</button>
-                    </div>
-                </div>
-                <input type="text" placeholder="Special instructions..." oninput="updateInstruction(${item.id}, '${item.size}', this.value)" value="${item.instruction || ''}" class="mt-3 w-full p-2 text-xs border-b border-gray-100 focus:outline-none focus:border-[#154BD1] font-bold uppercase opacity-70">
-            </div>`;
-        }).join("")}
+                    <input type="text" placeholder="Special instructions..." oninput="updateInstruction(${item.id}, '${item.size}', this.value)" value="${item.instruction || ''}" class="mt-3 w-full p-2 text-xs border-b border-gray-100 focus:outline-none focus:border-[#154BD1] font-bold uppercase opacity-70">
+                </div>`;
+            }).join("")}
         </div>
+
         <div class="bg-white p-6 rounded-3xl mt-6 shadow-sm flex flex-col md:flex-row gap-4 items-center">
             <input type="text" id="promo-input" placeholder="Promo Code" class="w-full p-4 rounded-xl border-2 border-[#154BD1]/10 font-bold uppercase">
             <button onclick="applyPromo()" class="w-full md:w-40 bg-[#154BD1] text-white py-4 rounded-xl font-black uppercase">Apply</button>
         </div>
+
         <div class="bg-[#154BD1] text-[#F3F2D4] p-8 rounded-[2rem] mt-6">
             <h3 class="text-2xl font-black mb-6 uppercase">Total: Rs. ${finalTotal.toFixed(0)}</h3>
             <form id="order-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input type="text" id="cust-name" placeholder="Full Name" required class="p-4 rounded-xl text-[#154BD1] font-bold">
-                <input type="text" id="cust-phone" placeholder="Phone" required class="p-4 rounded-xl text-[#154BD1] font-bold">
-                <input type="email" id="cust-email" placeholder="Email" required class="p-4 rounded-xl text-[#154BD1] font-bold md:col-span-2">
-                <input type="text" id="cust-address" placeholder="Address" required class="p-4 rounded-xl text-[#154BD1] font-bold md:col-span-2">
+                <input type="text" id="cust-name" placeholder="Full Name" required value="${savedInfo.name || ''}" class="p-4 rounded-xl text-[#154BD1] font-bold">
+                <input type="text" id="cust-phone" placeholder="Phone" required value="${savedInfo.phone || ''}" class="p-4 rounded-xl text-[#154BD1] font-bold">
+                <input type="email" id="cust-email" placeholder="Email" required value="${savedInfo.email || ''}" class="p-4 rounded-xl text-[#154BD1] font-bold md:col-span-2">
+                <input type="text" id="cust-address" placeholder="Address" required value="${savedInfo.address || ''}" class="p-4 rounded-xl text-[#154BD1] font-bold md:col-span-2">
+                
+                <div class="md:col-span-2 flex items-center gap-3 mt-2 cursor-pointer group" onclick="toggleSaveDetails()">
+                    <div id="save-check-circle" class="w-6 h-6 rounded-full border-2 border-white flex items-center justify-center transition-all group-active:scale-90">
+                        <div id="save-check-dot" class="w-3 h-3 bg-white rounded-full ${isSaveEnabled ? '' : 'hidden'}"></div>
+                    </div>
+                    <span class="text-[10px] font-black uppercase tracking-widest opacity-80">Save my details for next time</span>
+                </div>
+
                 <button type="submit" id="order-btn" class="md:col-span-2 bg-[#F3F2D4] text-[#154BD1] py-5 rounded-xl font-black uppercase text-xl mt-4">Order Now</button>
             </form>
         </div>
@@ -401,6 +446,10 @@ function attachListeners() {
 
 async function processOrder() {
     if (!isStoreOpen()) { showNotification("CLOSED. <br> OPEN 5PM - 2:45AM"); return; }
+    
+    // SAVE OR UPDATE CUSTOMER INFO BEFORE PROCESSING
+    saveCustomerInfo();
+
     const btn = document.getElementById('order-btn');
     btn.innerText = "SENDING ORDER..."; btn.disabled = true;
     const orderId = "DASH-" + Date.now().toString().slice(-6);
@@ -411,7 +460,16 @@ async function processOrder() {
     const itemDetails = cart.map(i => `${i.qty}x ${PIZZAS.find(p=>p.id===i.id).name} (${i.size})`).join('\n');
 
     try {
-        await emailjs.send('service_g7du1xb', 'template_4xyaqxx', { order_id: orderId, customer_name: document.getElementById('cust-name').value, customer_phone: document.getElementById('cust-phone').value, customer_email: document.getElementById('cust-email').value, delivery_address: document.getElementById('cust-address').value, item_details: itemDetails, total_price: total, order_time: `${dateStr} ${timeStr}` });
+        await emailjs.send('service_g7du1xb', 'template_4xyaqxx', { 
+            order_id: orderId, 
+            customer_name: document.getElementById('cust-name').value, 
+            customer_phone: document.getElementById('cust-phone').value, 
+            customer_email: document.getElementById('cust-email').value, 
+            delivery_address: document.getElementById('cust-address').value, 
+            item_details: itemDetails, 
+            total_price: total, 
+            order_time: `${dateStr} ${timeStr}` 
+        });
         orders.unshift({ id: orderId, items: [...cart], total, timestamp: Date.now(), date: dateStr, time: timeStr });
         unreadOrdersCount++; cart = []; appliedDiscount = 0; saveState();
         sessionStorage.setItem('order_success_flag', 'true');
