@@ -6,7 +6,7 @@ const PIZZAS = [
     { id: 5, name: "Dynamite Ranch", category: "Premium", prices: { Regular: 900, Party: 1750 }, img: "dynamite-ranch.png", desc: "Pizza with Chicken and Cheese." },
     { id: 6, name: "Double Dough American Heat", category: "Double Dough", prices: { standard: 2100 }, img: "american-heat.png", desc: "Pizza with Jalapenos, Fiery sauce and Cheese." },
     { id: 7, name: "Double Dough Smokey Wheel", category: "Double Dough", prices: { standard: 2100 }, img: "smoky-wheel.png", desc: "Pizza with Jalapenos, Fiery sauce and Cheese." },
-    { id: 8, name: "Double Dough Extreme Kababish", category: "Double Dough", prices: { standard: 2100 }, img: "smoky-wheel.png", desc: "Pizza with Seekh Kabab and Cheese on Dough." },
+    { id: 8, name: "Double Dough Extreme Kababish", category: "Double Dough", prices: { standard: 2100 }, img: "extreme-kababish.png", desc: "Pizza with Seekh Kabab and Cheese on Dough." },
     { id: 9, name: "Double Dough Mughlai Pizza", category: "Double Dough", prices: { standard: 2100 }, img: "mughlai-pizza.png", desc: "Pizza with Creamy Sauce, with Cheese." },
     { id: 10, name: "Double Dough Dynamite Ranch", category: "Double Dough", prices: { standard: 2100 }, img: "dynamite-ranch.png", desc: "Pizza with Chicken and Cheese." },
     { id: 11, name: "10 Pcs Buzz Bites", category: "Others", prices: { Standard: 500 }, img: "buzz-bites.png", desc: "Golden chicken, dip it in the sauce." },
