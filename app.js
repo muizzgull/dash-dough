@@ -814,11 +814,13 @@ async function allReviewsView() {
 
     const data = await res.json();
 
-    if (!data.success) {
-        alert(data.message || "Failed to fetch reviews. Please try again.");
-        console.log(data);
-        return false;
-    }
+    console.log("Fetched reviews:", reviews);
+
+    // if (!data.success) {
+    //     alert(data.message || "Failed to fetch reviews. Please try again.");
+    //     console.log(data);
+    //     return false;
+    // }
 
     const reviews = data.reviews;
 
