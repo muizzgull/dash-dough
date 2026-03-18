@@ -810,7 +810,7 @@ function AddReviewView() {
 
 async function allReviewsView() {
 
-    const res = await fetch("https://dash-dough-backend.vercel.app/api/review");
+    const res = await fetch("https://dash-dough-backend.vercel.app/api/review/");
 
     const data = await res.json();
 
