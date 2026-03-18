@@ -725,7 +725,6 @@ function setRating(starCount) {
         }
     }
 
-    console.log(`Rating set to ${starCount} stars`);
 }
 
 async function submitReview(event) {
@@ -755,7 +754,10 @@ async function submitReview(event) {
 
     else{
         alert("Thank you for your feedback!");
-        document.getElementById('review-form').reset();
+        // document.getElementById('review-form').reset();
+        document.querySelectorAll('#review-form input').forEach(input => input.value = '');
+        document.querySelectorAll('#review-form textarea').forEach(textarea => textarea.value = '');
+
         setRating(1);
     }
     
