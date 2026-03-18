@@ -814,7 +814,7 @@ async function allReviewsView() {
 
     const data = await res.json();
 
-    console.log("Fetched reviews:", reviews);
+    // console.log("Fetched reviews:", reviews);
 
     // if (!data.success) {
     //     alert(data.message || "Failed to fetch reviews. Please try again.");
