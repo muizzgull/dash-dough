@@ -75,21 +75,42 @@ function renderFloatingCart() {
         </div>`;
 }
 
-const router = (withAnimation = true) => {
+
+
+const router = async (withAnimation = true) => {
     const wave = document.getElementById('wave-transition');
     const routes = [
         { path: "#/", view: HomeView }, 
         { path: "#/cart", view: CartView }, 
         { path: "#/orders", view: OrdersView },
-        { path: "#/add-review", view: AddReviewView }
+        { path: "#/add-review", view: AddReviewView },
+        { path: "#/reviews", view: allReviewsView },
         // { path: "#/login", view: LoginView },
         // { path: "#/signup", view: SignupView }
     ];
+    
     const match = routes.find(r => r.path === (location.hash || "#/")) || routes[0];
 
-    const render = () => {
+    // THE FIX: We make render async so it can wait for async views
+    const render = async () => {
         window.scrollTo(0, 0);
-        document.getElementById("app").innerHTML = `<main class="min-h-screen pb-32">${match.view()}</main>${renderFooter()}`;
+        
+        // 1. Show a loader if the view takes time to fetch
+        const app = document.getElementById("app");
+        
+        // 2. Execute the view function (it might return a string OR a Promise)
+        let viewContent = match.view();
+        
+        // 3. If it's a Promise (async function), wait for it to finish
+        if (viewContent instanceof Promise) {
+            // Optional: show a quick spinner while waiting
+            app.innerHTML = `<div class="flex items-center justify-center min-h-screen"><div class="animate-spin h-8 w-8 border-4 border-[#154BD1] border-t-transparent rounded-full"></div></div>`;
+            viewContent = await viewContent;
+        }
+
+        // 4. Finally set the HTML
+        app.innerHTML = `<main class="min-h-screen pb-32">${viewContent}</main>${renderFooter()}`;
+        
         saveState();
         attachListeners();
         
@@ -103,9 +124,10 @@ const router = (withAnimation = true) => {
         wave.classList.remove('wave-active');
         void wave.offsetWidth; 
         wave.classList.add('wave-active');
-        setTimeout(render, 500); 
+        // We use 'await' here because render is now async
+        setTimeout(async () => await render(), 500); 
     } else {
-        render();
+        await render();
     }
 };
 
@@ -781,6 +803,58 @@ function AddReviewView() {
                 Post Review
             </button>
         </form>
+    </div>
+</div>`;
+}
+
+
+async function allReviewsView() {
+
+    const res = await fetch("https://dash-dough-backend.vercel.app/api/review");
+
+    const data = await res.json();
+
+    if (!data.success) {
+        alert(data.message || "Failed to fetch reviews. Please try again.");
+        console.log(data);
+        return false;
+    }
+
+    const reviews = data.reviews;
+
+   
+
+    // const reviews = [
+    //     { userName: "John Doe", email: "john.doe@example.com", rating: 4, review: "THE BEST PIZZA IN TOWN! THE CRUST WAS PERFECTLY CRISPY AND THE CHEESE WAS MELTY HEAVEN." },
+    //     { userName: "Alice Smith", rating: 3, review: "GOOD FLAVOR BUT THE PIZZA WAS A BIT TOO GREASY FOR MY TASTE. STILL ENJOYED IT THOUGH." }
+    // ];
+
+    const reviewsContent = reviews.map(r => {
+        return `<div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <div class="flex items-center gap-4 mb-4">
+                <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-xl font-bold text-gray-500">${r.userName.charAt(0).toUpperCase()}</div>
+                <div>
+                    <h4 class="font-black uppercase">${r.userName}</h4>
+                    <p class="text-xs opacity-60 font-bold">${r.email || ''}</p>
+                    <div class="flex gap-1 text-yellow-400">
+                        ${[...Array(5)].map((_, i) => `<span class="text-lg">${i < r.rating ? '★' : '☆'}</span>`).join("")}
+                    </div>
+                </div>
+            </div>
+            <p class="font-bold uppercase opacity-80">${r.review}</p>
+        </div>`
+    })
+
+
+    return `<div class="max-w-4xl mx-auto p-4 md:p-8 font-sans">
+    <div class="mb-8">
+        <h2 class="text-4xl font-black uppercase text-[#154BD1]">Reviews</h2>
+        <p class="font-bold opacity-60">WHAT PEOPLE ARE SAYING ABOUT US.</p>
+    </div>
+
+    <div id="reviews-container" class="space-y-6">
+        
+       ${reviewsContent.join("")}
     </div>
 </div>`;
 }
