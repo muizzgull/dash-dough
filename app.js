@@ -783,7 +783,7 @@ function AddReviewView() {
             <div class="mb-8">
                 <label class="block text-xs font-black uppercase mb-2 opacity-50">The Rating</label>
                 <div class="flex gap-2" id="star-rating">
-                    <button type="button" id="star-1" value="1" onclick="setRating(1)" class="star-btn text-3xl text-gray-200 text-yellow-400">★</button>
+                    <button type="button" id="star-1" value="1" onclick="setRating(1)" class="star-btn text-3xl text-yellow-400">★</button>
                     <button type="button" id="star-2" value="2" onclick="setRating(2)" class="star-btn text-3xl text-gray-200">★</button>
                     <button type="button" id="star-3" value="3" onclick="setRating(3)" class="star-btn text-3xl text-gray-200">★</button>
                     <button type="button" id="star-4" value="4" onclick="setRating(4)" class="star-btn text-3xl text-gray-200">★</button>
