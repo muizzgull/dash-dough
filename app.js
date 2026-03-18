@@ -716,12 +716,16 @@ function setRating(starCount) {
     } else {
         for(let i = 1; i <= starCount; i++) {
             document.getElementById(`star-${i}`).classList.add('text-yellow-400');
-            
+            // Instead of just .add(), do this:
+            document.getElementById(`star-${i}`).classList.remove('text-gray-200');
+
             for(let j = starCount + 1; j <= 5; j++) {
                 document.getElementById(`star-${j}`).classList.remove('text-yellow-400');
             }   
         }
     }
+
+    console.log(`Rating set to ${starCount} stars`);
 }
 
 async function submitReview(event) {
