@@ -822,6 +822,8 @@ async function allReviewsView() {
 
     const reviews = data.reviews;
 
+    console.log("Fetched reviews:", reviews);
+
    
 
     // const reviews = [
