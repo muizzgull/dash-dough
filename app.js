@@ -788,6 +788,7 @@ function AddReviewView() {
                     <button type="button" id="star-3" value="3" onclick="setRating(3)" class="star-btn text-3xl text-gray-200">★</button>
                     <button type="button" id="star-4" value="4" onclick="setRating(4)" class="star-btn text-3xl text-gray-200">★</button>
                     <button type="button" id="star-5" value="5" onclick="setRating(5)" class="star-btn text-3xl text-gray-200">★</button>
+                    <div class="hidden text-yellow-400"></div>
                 </div>
                 <input type="hidden" id="rating-value" value="0" required>
             </div>
