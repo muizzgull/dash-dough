@@ -212,10 +212,13 @@ function renderFAQ() {
         { q: "Delivery Time & Charges?", a: "Standard delivery takes about **35 to 45 minutes**. Charges depend on distance, with a minimum charge of **Rs. 80**." }
     ];
 
+    // ADD THE ID HERE:
     let faqHtml = `
-    <section class="max-w-4xl mx-auto px-4 mt-20 mb-10">
+    <section id="questions-section" class="max-w-4xl mx-auto px-4 mt-20 mb-10">
         <h2 class="text-3xl font-black uppercase text-[#154BD1] mb-8 text-center underline decoration-yellow-400">Questions</h2>
         <div class="space-y-4">`;
+    
+    // ... rest of your loop
 
     faqs.forEach((item, index) => {
         faqHtml += `
@@ -720,7 +723,9 @@ function setRating(starCount) {
             document.getElementById(`star-${i}`).classList.remove('text-gray-200');
 
             for(let j = starCount + 1; j <= 5; j++) {
+                document.getElementById(`star-${i}`).classList.add('text-gray-200');
                 document.getElementById(`star-${j}`).classList.remove('text-yellow-400');
+                
             }   
         }
     }
@@ -746,17 +751,18 @@ async function submitReview(event) {
 
     const data = await res.json();
 
-    if (!data.success) {
+    if (!data.ok) {
         alert(data.message || "Failed to submit review. Please try again.");
         console.log(data);
         return false;
     }
 
     else{
-        alert("Thank you for your feedback!");
+        // alert("Thank you for your feedback!");
         // document.getElementById('review-form').reset();
         document.querySelectorAll('#review-form input').forEach(input => input.value = '');
         document.querySelectorAll('#review-form textarea').forEach(textarea => textarea.value = '');
+        
 
         setRating(1);
     }
@@ -869,3 +875,30 @@ async function allReviewsView() {
     </div>
 </div>`;
 }
+window.scrollToQuestions = () => {
+    // 1. If we are NOT on the home page, go home first
+    if (window.location.hash !== "#/" && window.location.hash !== "") {
+        window.location.hash = "#/";
+    }
+
+    // 2. Wait for the HomeView to render, then scroll
+    const checkExist = setInterval(() => {
+        const element = document.getElementById('questions-section');
+        if (element) {
+            const offset = 100; // Account for your sticky navbar height
+            const bodyRect = document.body.getBoundingClientRect().top;
+            const elementRect = element.getBoundingClientRect().top;
+            const elementPosition = elementRect - bodyRect;
+            const offsetPosition = elementPosition - offset;
+
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+            
+            clearInterval(checkExist);
+        }
+    }, 100);
+
+    setTimeout(() => clearInterval(checkExist), 2000);
+};
