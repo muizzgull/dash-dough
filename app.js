@@ -141,15 +141,11 @@ function renderFooter() {
             <div>
                 <h4 class="text-xs font-black uppercase mb-6 opacity-40">Links</h4>
                 <ul class="flex flex-col gap-3 font-bold uppercase">
-                    <li><a href="#/">Explore Menu</a></li>
+                    <li><a href="#/reviews">Customer Reviews</a></li>
                     <li><a href="#/cart">Your Cart</a></li>
+                    <li><a href="#/">Explore Menu</a></li>
                     <li><a href="#/orders">Your Orders</a></li>
                 </ul>
-            </div>
-            <div>
-                <h4 class="text-xs font-black uppercase mb-6 opacity-40">Contact</h4>
-                <p class="font-black text-lg opacity-80">0370-3302022</p>
-                <p class="font-bold opacity-70">dashdough4@gmail.com</p>
             </div>
         </div>
     </footer>`;
@@ -189,7 +185,7 @@ function HomeView() {
                         <span id="menu-qty-${pizza.id}" class="font-black text-lg">1</span>
                         <button onclick="updateMenuQty(${pizza.id}, 1)" class="w-8 h-8 flex items-center justify-center bg-white rounded-lg font-black">+</button>
                     </div>
-                    <button onclick="addToCart(${pizza.id})" class="w-full bg-[#154BD1] text-[#F3F2D4] py-2 md:py-4 rounded-xl font-black uppercase">Add to Cart</button>
+                    <button onclick="addToCart(${pizza.id})" class="w-full bg-[#154BD1] text-[#F3F2D4] hover:bg-[#F3F2D4] hover:text-[#154BD1] transition-all duration-300 py-2 md:py-4 rounded-xl font-black uppercase">Add to Cart</button>
                 </div>
             </div>`;
         });
@@ -822,56 +818,39 @@ function AddReviewView() {
 
 
 async function allReviewsView() {
-
+    // ... your existing fetch logic ...
     const res = await fetch("https://dash-dough-backend.vercel.app/api/review/");
-
     const data = await res.json();
-
-    // console.log("Fetched reviews:", reviews);
-
-    // if (!data.success) {
-    //     alert(data.message || "Failed to fetch reviews. Please try again.");
-    //     console.log(data);
-    //     return false;
-    // }
-
     const reviews = data.reviews;
 
-    console.log("Fetched reviews:", reviews);
-
-   
-
-    // const reviews = [
-    //     { userName: "John Doe", email: "john.doe@example.com", rating: 4, review: "THE BEST PIZZA IN TOWN! THE CRUST WAS PERFECTLY CRISPY AND THE CHEESE WAS MELTY HEAVEN." },
-    //     { userName: "Alice Smith", rating: 3, review: "GOOD FLAVOR BUT THE PIZZA WAS A BIT TOO GREASY FOR MY TASTE. STILL ENJOYED IT THOUGH." }
-    // ];
-
     const reviewsContent = reviews.map(r => {
-        return `<div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        return `<div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
             <div class="flex items-center gap-4 mb-4">
-                <div class="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center text-xl font-bold text-gray-500">${r.userName.charAt(0).toUpperCase()}</div>
+                <div class="w-12 h-12 bg-[#154BD1] rounded-full flex items-center justify-center text-xl font-bold text-white">${r.userName.charAt(0).toUpperCase()}</div>
                 <div>
-                    <h4 class="font-black uppercase">${r.userName}</h4>
-                    <p class="text-xs opacity-60 font-bold">${r.email || ''}</p>
+                    <h4 class="font-black uppercase text-[#154BD1]">${r.userName}</h4>
                     <div class="flex gap-1 text-yellow-400">
                         ${[...Array(5)].map((_, i) => `<span class="text-lg">${i < r.rating ? '★' : '☆'}</span>`).join("")}
                     </div>
                 </div>
             </div>
-            <p class="font-bold uppercase opacity-80">${r.review}</p>
+            <p class="font-bold uppercase opacity-80 leading-relaxed text-[#154BD1]">${r.review}</p>
         </div>`
-    })
-
+    }).join("");
 
     return `<div class="max-w-4xl mx-auto p-4 md:p-8 font-sans">
-    <div class="mb-8">
-        <h2 class="text-4xl font-black uppercase text-[#154BD1]">Reviews</h2>
-        <p class="font-bold opacity-60">WHAT PEOPLE ARE SAYING ABOUT US.</p>
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+        <div>
+            <h2 class="text-4xl font-black uppercase text-[#154BD1]">Reviews</h2>
+            <p class="font-bold opacity-60">WHAT PEOPLE ARE SAYING ABOUT US.</p>
+        </div>
+        <a href="#/add-review" class="bg-yellow-400 text-[#154BD1] px-6 py-3 rounded-xl font-black uppercase text-sm shadow-lg hover:scale-105 transition-transform">
+            Write a Review
+        </a>
     </div>
 
-    <div id="reviews-container" class="space-y-6">
-        
-       ${reviewsContent.join("")}
+    <div id="reviews-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        ${reviewsContent || '<p class="col-span-2 text-center opacity-30 font-black py-10">NO REVIEWS YET. BE THE FIRST!</p>'}
     </div>
 </div>`;
 }
