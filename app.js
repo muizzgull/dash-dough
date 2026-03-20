@@ -578,7 +578,7 @@ async function processOrder() {
 //     const email = document.getElementById('email').value.toLowerCase();
 //     const password = document.getElementById('password').value;
 
-//     const res = await fetch('https://dash-dough-backend.vercel.app/api/auth/login', {
+//     const res = await fetch('https://dashdough-backend.vercel.app/api/auth/login', {
 //         method: 'POST',
 //         headers: { 'Content-Type': 'application/json' },
 //         body: JSON.stringify({ email, password }),
@@ -641,7 +641,7 @@ async function processOrder() {
 //         return false;
 //     }
 
-//     const res = await fetch('https://dash-dough-backend.vercel.app/api/auth/signup', {
+//     const res = await fetch('https://dashdough-backend.vercel.app/api/auth/signup', {
 //         method: 'POST',
 //         headers: { 'Content-Type': 'application/json' },
 //         body: JSON.stringify({ name, phone, email, password, confirmPassword }),
@@ -747,7 +747,7 @@ async function submitReview(event) {
 
         const reviewText = document.getElementById('review-text').value;
 
-        const res = await fetch('https://dash-dough-backend.vercel.app/api/review', {
+        const res = await fetch('https://dashdough-backend.vercel.app/api/review', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userName:name, email, rating, review: reviewText }),
@@ -772,7 +772,7 @@ async function submitReview(event) {
             
         }
     } catch (error) {
-        
+        alert(error)
     } finally {
         reviewSubmitButton.innerHTML = "POST REVIEW";
         reviewSubmitButton.disabled = false;
@@ -787,7 +787,7 @@ function AddReviewView() {
     return `<div class="max-w-4xl mx-auto p-4 md:p-8 font-sans">
     <div class="mb-8">
         <h2 class="text-4xl font-black uppercase text-[#154BD1]">Rate Your Experience</h2>
-        <p class="font-bold opacity-60">YOUR REVIEW WILL GET SHOWN TO OTHER PEOPLE.</p>
+        <p class="font-bold opacity-60">YOUR WILL GET SHOWN TO OTHER PEOPLE.</p>
     </div>
 
     <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100">
@@ -837,7 +837,7 @@ function AddReviewView() {
 
 async function allReviewsView() {
     // ... your existing fetch logic ...
-    const res = await fetch("https://dash-dough-backend.vercel.app/api/review/");
+    const res = await fetch("https://dashdough-backend.vercel.app/api/review/");
     const data = await res.json();
     const reviews = data.reviews;
 
