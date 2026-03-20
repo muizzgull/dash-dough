@@ -730,38 +730,54 @@ function setRating(starCount) {
 
 async function submitReview(event) {
     event.preventDefault();
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
+    const reviewSubmitButton = document.querySelector("#review-submit-button")
 
-    const starBtns = document.querySelectorAll('#star-rating .star-btn');
-    const rating = Array.from(starBtns).filter(btn => btn.classList.contains('text-yellow-400')).length;
-
-    const reviewText = document.getElementById('review-text').value;
-
-    const res = await fetch('https://dash-dough-backend.vercel.app/api/review', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userName:name, email, rating, review: reviewText }),
-        credentials: 'include'
-    })
-
-    const data = await res.json();
-
-    if (!data.ok) {
-        alert(data.message || "Failed to submit review. Please try again.");
-        console.log(data);
-        return false;
-    }
-
-    else{
-        // alert("Thank you for your feedback!");
-        // document.getElementById('review-form').reset();
-        document.querySelectorAll('#review-form input').forEach(input => input.value = '');
-        document.querySelectorAll('#review-form textarea').forEach(textarea => textarea.value = '');
+    try {
         
+        reviewSubmitButton.innerHTML = "Submitting review..."
+        reviewSubmitButton.disabled = true
 
-        setRating(1);
+
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+
+        const starBtns = document.querySelectorAll('#star-rating .star-btn');
+        const rating = Array.from(starBtns).filter(btn => btn.classList.contains('text-yellow-400')).length;
+
+        const reviewText = document.getElementById('review-text').value;
+
+        const res = await fetch('https://dash-dough-backend.vercel.app/api/review', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userName:name, email, rating, review: reviewText }),
+            credentials: 'include'
+        })
+
+        const data = await res.json();
+
+        if (!data.ok) {
+            alert(data.message || "Failed to submit review. Please try again.");
+            console.log(data);
+            return false;
+        }
+
+        else{
+            document.querySelector('#review-form #name').value = '';
+            document.querySelector('#review-form #email').value = '';
+            document.querySelector('#review-form #review-text').value = '';
+            
+
+            setRating(1);
+            
+        }
+    } catch (error) {
+        
+    } finally {
+        reviewSubmitButton.innerHTML = "POST REVIEW";
+        reviewSubmitButton.disabled = false;
     }
+
+    
     
 }
 
@@ -791,12 +807,13 @@ function AddReviewView() {
             <div class="mb-8">
                 <label class="block text-xs font-black uppercase mb-2 opacity-50">The Rating</label>
                 <div class="flex gap-2" id="star-rating">
+                    <div class="hidden text-yellow-400"></div>
                     <button type="button" id="star-1" value="1" onclick="setRating(1)" class="star-btn text-3xl text-yellow-400">★</button>
                     <button type="button" id="star-2" value="2" onclick="setRating(2)" class="star-btn text-3xl text-gray-200">★</button>
                     <button type="button" id="star-3" value="3" onclick="setRating(3)" class="star-btn text-3xl text-gray-200">★</button>
                     <button type="button" id="star-4" value="4" onclick="setRating(4)" class="star-btn text-3xl text-gray-200">★</button>
                     <button type="button" id="star-5" value="5" onclick="setRating(5)" class="star-btn text-3xl text-gray-200">★</button>
-                    <div class="hidden text-yellow-400"></div>
+                    
                 </div>
                 <input type="hidden" id="rating-value" value="0" required>
             </div>
@@ -808,7 +825,7 @@ function AddReviewView() {
             </div>
 
            
-            <button type="submit" class="w-full bg-[#154BD1] text-[#F3F2D4] py-5 rounded-2xl font-black uppercase text-xl shadow-lg hover:opacity-90 transition-all">
+            <button type="submit" id="review-submit-button" class="w-full bg-[#154BD1] text-[#F3F2D4] py-5 rounded-2xl font-black uppercase text-xl shadow-lg hover:opacity-90 transition-all">
                 Post Review
             </button>
         </form>
