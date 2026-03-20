@@ -42,13 +42,25 @@ function saveState() {
     renderFloatingCart();
 }
 
+// function isStoreOpen() {
+//     const now = new Date();
+//     const pkTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Karachi"}));
+//     const hours = pkTime.getHours();
+//     const minutes = pkTime.getMinutes();
+//     const totalMinutes = hours * 60 + minutes;
+//     return (totalMinutes >= 1020 || totalMinutes <= 165); 
+// }
+
+// New Timing
 function isStoreOpen() {
     const now = new Date();
     const pkTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Karachi"}));
     const hours = pkTime.getHours();
     const minutes = pkTime.getMinutes();
     const totalMinutes = hours * 60 + minutes;
-    return (totalMinutes >= 1020 || totalMinutes <= 165); 
+    
+    // Logic: Open if time is >= 12:00 PM (720 mins) OR <= 4:00 AM (240 mins)
+    return (totalMinutes >= 720 || totalMinutes <= 240); 
 }
 
 function renderFloatingCart() {
@@ -536,21 +548,30 @@ function attachListeners() {
 }
 
 async function processOrder() {
-    if (!isStoreOpen()) { showNotification("CLOSED. <br> OPEN 5PM - 2:45AM"); return; }
+    // Check if store is open (12:00 PM to 4:00 AM)
+    if (!isStoreOpen()) { 
+        // Added 'text-center' to ensure the message is centered and stacked
+        showNotification("<div class='text-center uppercase'>Closed<br>Open 12PM - 4AM</div>"); 
+        return; 
+    }
     
-    // SAVE OR UPDATE CUSTOMER INFO BEFORE PROCESSING
+    // Save or update customer info before processing
     saveCustomerInfo();
 
     const btn = document.getElementById('order-btn');
-    btn.innerText = "SENDING ORDER..."; btn.disabled = true;
+    btn.innerText = "SENDING ORDER..."; 
+    btn.disabled = true;
+
     const orderId = "DASH-" + Date.now().toString().slice(-6);
     const now = new Date();
     const dateStr = now.toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' });
     const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    
     const total = Math.round(cart.reduce((acc, i) => acc + (i.price * i.qty), 0) * (1 - appliedDiscount));
     const itemDetails = cart.map(i => `${i.qty}x ${PIZZAS.find(p=>p.id===i.id).name} (${i.size})`).join('\n');
 
     try {
+        // Sending order via EmailJS
         await emailjs.send('service_g7du1xb', 'template_4xyaqxx', { 
             order_id: orderId, 
             customer_name: document.getElementById('cust-name').value, 
@@ -561,12 +582,21 @@ async function processOrder() {
             total_price: total, 
             order_time: `${dateStr} ${timeStr}` 
         });
+
+        // Update local orders history
         orders.unshift({ id: orderId, items: [...cart], total, timestamp: Date.now(), date: dateStr, time: timeStr });
-        unreadOrdersCount++; cart = []; appliedDiscount = 0; saveState();
+        unreadOrdersCount++; 
+        cart = []; 
+        appliedDiscount = 0; 
+        saveState();
+
+        // Redirect to orders page with success flag
         sessionStorage.setItem('order_success_flag', 'true');
         location.hash = "#/orders"; 
     } catch (error) {
-        showNotification("ORDER FAILED."); btn.innerText = "ORDER NOW"; btn.disabled = false;
+        showNotification("ORDER FAILED."); 
+        btn.innerText = "ORDER NOW"; 
+        btn.disabled = false;
     }
 }
 
