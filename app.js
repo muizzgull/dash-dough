@@ -729,6 +729,7 @@ function setRating(starCount) {
 }
 
 async function submitReview(event) {
+    // testing 
     event.preventDefault();
     const reviewSubmitButton = document.querySelector("#review-submit-button")
 
