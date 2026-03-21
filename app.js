@@ -52,7 +52,7 @@ function saveState() {
 // }
 
 // New Timing
-Function isStoreOpen() {
+function isStoreOpen() {
     const now = new Date();
     const pkTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Karachi"}));
     const hours = pkTime.getHours();
