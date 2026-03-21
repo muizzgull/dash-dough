@@ -52,17 +52,15 @@ function saveState() {
 // }
 
 // New Timing
-function isStoreOpen() {
+Function isStoreOpen() {
     const now = new Date();
-    // Use the Asia/Karachi timezone specifically
     const pkTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Karachi"}));
-    
     const hours = pkTime.getHours();
     const minutes = pkTime.getMinutes();
-    const totalMinutes = (hours * 60) + minutes;
+    const totalMinutes = hours * 60 + minutes;
     
-    // Open if time is >= 2:00 PM (840 mins) OR <= 4:00 AM (240 mins)
-    return (totalMinutes >= 840 || totalMinutes <= 240); 
+    // Logic: Open if time is >= 12:00 PM (720 mins) OR <= 4:00 AM (240 mins)
+    return (totalMinutes >= 720 || totalMinutes <= 240); 
 }
 
 
@@ -554,7 +552,7 @@ async function processOrder() {
     // Check if store is open (12:00 PM to 4:00 AM)
     if (!isStoreOpen()) { 
         // Added 'text-center' to ensure the message is centered and stacked
-        showNotification("<div class='text-center uppercase'>Closed<br>Open 2PM - 4AM</div>"); 
+        showNotification("<div class='text-center uppercase'>Closed<br>Open 12PM - 4AM</div>"); 
         return; 
     }
     
