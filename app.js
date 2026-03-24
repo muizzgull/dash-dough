@@ -59,9 +59,10 @@ function isStoreOpen() {
     const minutes = pkTime.getMinutes();
     const totalMinutes = hours * 60 + minutes;
     
-    // Logic: Open if time is >= 12:00 PM (720 mins) OR <= 4:00 AM (240 mins)
-    return (totalMinutes >= 720 || totalMinutes <= 240); 
+    // Logic: Open if time is >= 3:00 PM (900 mins) OR <= 3:00 AM (180 mins)
+    return (totalMinutes >= 900 || totalMinutes <= 180); 
 }
+
 
 
 function renderFloatingCart() {
@@ -552,7 +553,7 @@ async function processOrder() {
     // Check if store is open (12:00 PM to 4:00 AM)
     if (!isStoreOpen()) { 
         // Added 'text-center' to ensure the message is centered and stacked
-        showNotification("<div class='text-center uppercase'>Closed<br>Open 12PM - 4AM</div>"); 
+        showNotification("<div class='text-center uppercase'>Closed<br>Open 3PM - 3AM</div>"); 
         return; 
     }
     
