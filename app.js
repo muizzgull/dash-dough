@@ -54,8 +54,6 @@ function saveState() {
 // New Timing
 function isStoreOpen() {
     const now = new Date();
-    // Using 'sv-SE' or 'en-GB' inside toLocaleString is often more reliable for parsing 
-    // but sticking to your logic:
     const pkTime = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Karachi"}));
     
     const hours = pkTime.getHours();
@@ -63,10 +61,12 @@ function isStoreOpen() {
     const totalMinutes = (hours * 60) + minutes;
     
     // Logic: 
-    // >= 1020 (5:00 PM onwards)
-    // <= 165  (Until 2:45 AM)
-    return (totalMinutes >= 1020 || totalMinutes <= 165); 
+    // >= 720 (12:00 PM onwards)
+    // OR
+    // <= 165 (Until 2:45 AM)
+    return (totalMinutes >= 720 || totalMinutes <= 165); 
 }
+
 
 
 
@@ -559,7 +559,7 @@ async function processOrder() {
     // Check if store is open (12:00 PM to 4:00 AM)
     if (!isStoreOpen()) { 
         // Added 'text-center' to ensure the message is centered and stacked
-        showNotification("<div class='text-center uppercase'>Closed<br>Open 5:00PM - 2:45AM</div>"); 
+        showNotification("<div class='text-center uppercase'>Closed<br>Open 12:00PM - 2:45AM</div>"); 
         return; 
     }
     
